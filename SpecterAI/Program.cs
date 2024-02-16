@@ -5,6 +5,7 @@ using Discord.Interactions;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using SummaryAttribute = Discord.Commands.SummaryAttribute;
+using SpecterAI.pokemonStuff;
 
 public class Program
 {
@@ -17,6 +18,10 @@ public class Program
 
     public async Task MainAsync()
     {
+        PokemonRenderer renderer = new PokemonRenderer();
+        renderer.renderTest();
+
+
         SecretsHandler.LoadSecrets();
 
         // This sets up the bot's basic settings.
