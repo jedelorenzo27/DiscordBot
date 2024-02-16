@@ -8,10 +8,10 @@ using SummaryAttribute = Discord.Commands.SummaryAttribute;
 
 public class Program
 {
-    private DiscordSocketClient? _client;
-    private CommandService? _commands;
-    private InteractionService? _interactions;
-    private IServiceProvider? _services;
+    private DiscordSocketClient _client;
+    private CommandService _commands;
+    private InteractionService _interactions;
+    private IServiceProvider _services;
 
     public static async Task Main(string[] args) => await new Program().MainAsync();
 
@@ -19,7 +19,7 @@ public class Program
     {
         var config = new DiscordSocketConfig
         {
-            GatewayIntents = GatewayIntents.GuildMessages | GatewayIntents.DirectMessages | GatewayIntents.MessageContent | GatewayIntents.All
+            GatewayIntents =  GatewayIntents.All
         };
 
         _client = new DiscordSocketClient(config);
@@ -31,7 +31,7 @@ public class Program
         _client.Log += Log;
         _client.MessageReceived += HandleCommandAsync;
 
-        string token = "token here";
+        string token = "MTA2MDk5NTQwNDAzMzk2MTk4Ng.GjAXJ8.xDyIcbkdAnzFHFCZKFTAOHuGdqDoROcK2vYGas";
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
 
