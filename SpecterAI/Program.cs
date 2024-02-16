@@ -76,7 +76,10 @@ public class Program
         _client.Ready += Client_Ready;
 
         // Block this task until the program is closed.
-        await Task.Delay(-1);
+        //await Task.Delay(-1);
+        
+        Console.ReadKey();
+        await _client.LogoutAsync();
     }
 
     private async Task Client_Ready()
