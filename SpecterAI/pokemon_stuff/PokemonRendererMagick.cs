@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SpecterAI.pokemonStuff
 {
-    public class PokemonRenderer
+    public class PokemonRendererMagick
     {
 
         public void renderTest ()

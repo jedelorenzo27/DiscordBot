@@ -18,11 +18,11 @@ public class Program
 
     public async Task MainAsync()
     {
-        PokemonRenderer renderer = new PokemonRenderer();
+        SecretsHandler.LoadSecrets();
+        PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
         renderer.renderTest();
 
-
-        SecretsHandler.LoadSecrets();
+        return;
 
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,

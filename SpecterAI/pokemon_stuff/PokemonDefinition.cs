@@ -15,8 +15,9 @@ namespace SpecterAI.pokemonStuff
         public PokemonAttack[] moveset;
         public int retreatCost;
         public string flavorText;
-        public PokemonType[] weaknesses;
-        public PokemonType[] resistances;
+        public HashSet<PokemonType> weaknesses;
+        public HashSet<PokemonType> resistances;
+        public string portraitFileName;
 
         public string getHealthFormatted ()
         {
