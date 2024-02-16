@@ -17,6 +17,8 @@ public class Program
 
     public async Task MainAsync()
     {
+        SecretsHandler.LoadSecrets();
+
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,
         // like messages, new members, etc.
@@ -56,7 +58,7 @@ public class Program
         _client.InteractionCreated += HandleInteractionAsync;
 
 
-        string token = "token here";
+        string token = SecretsHandler.DiscordToken();
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
 
