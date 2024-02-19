@@ -40,14 +40,10 @@ namespace SpecterAI.helpers
             return maxLineHeight;
         }
 
-        public void renderText(Image image, Font font, RectangleF boundingBox, string text, HorizontalAlignment hAlign = HorizontalAlignment.Center, VerticalAlignment vAlign = VerticalAlignment.Top)
+        public void renderText(Image image, Brush brush, Font font, RectangleF boundingBox, string text, HorizontalAlignment hAlign = HorizontalAlignment.Center, VerticalAlignment vAlign = VerticalAlignment.Top)
         {
             font = new Font(font, getCorrectedFontSize(image, (int)font.Size));
             RichTextOptions options = new(font){};
-
-            Brush brush = Brushes.Solid(Color.Black);
-            Pen pen = Pens.Solid(Color.Black, 1);
-
             List<string> textLines = splitText(boundingBox, options, text);
             while (!textFitsBox(boundingBox, textLines, options) && font.Size > 1)
             {
@@ -89,10 +85,10 @@ namespace SpecterAI.helpers
 
 
 
-                PatternPen pen2 = Pens.Dash(Color.Green, 1);
-                RectangleF textBox = new RectangleF(newX, newY, beans.Width, beans.Height);
+                //PatternPen pen2 = Pens.Dash(Color.Green, 1);
+                //RectangleF textBox = new RectangleF(newX, newY, beans.Width, beans.Height);
 
-                image.Mutate(x => x.Draw(pen2, textBox));
+                //image.Mutate(x => x.Draw(pen2, textBox));
             }
         }
 
