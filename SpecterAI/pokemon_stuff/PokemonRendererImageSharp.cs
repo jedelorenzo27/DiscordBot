@@ -3,6 +3,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SpecterAI.helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace SpecterAI.pokemonStuff
 {
     public class PokemonRendererImageSharp
     {
+        private TextRendererHelper textHelper;
         private static bool renderDebugLines = true;
         private FontCollection fontCollection;
 
@@ -20,6 +22,7 @@ namespace SpecterAI.pokemonStuff
 
         public PokemonRendererImageSharp ()
         {
+            textHelper = new TextRendererHelper();
             fontCollection = new FontCollection ();
             //FontFamily family = fontCollection.Add(Utilities.getResourceDirectory() + @"fonts\SummerLadiesDEMO.ttf");
             FontFamily family = fontCollection.Add(Utilities.getResourceDirectory() + @"fonts\Cabin-VariableFont.ttf");
@@ -31,13 +34,13 @@ namespace SpecterAI.pokemonStuff
         public void renderTest()
         {
             PokemonDefinition pokemonDefinition = new PokemonDefinition();
-            pokemonDefinition.health = 100;
-            pokemonDefinition.name = "Bumper";
+            pokemonDefinition.health = 10000;
+            pokemonDefinition.name = "Bumper bump bumpy 100 boop 1234 chegu";
             pokemonDefinition.description = "Sample description";
-            pokemonDefinition.flavorText = "Really flavorfull text";
+            pokemonDefinition.flavorText = "In the heartland of America, where the sun sets behind fields of corn and the lights of the big city skyline are but a distant glimmer, the stage is set for a classic baseball rivalry. This tale unfolds with two teams: the Midland Mavericks, a team steeped in tradition, and the Coastal Clippers, known for their modern, analytics-driven approach. As the season progresses, these two teams find themselves locked in a fierce battle for the division title, each embodying opposing philosophies of the game they love.";
             pokemonDefinition.resistances = new HashSet<PokemonType> { PokemonType.FIRE, PokemonType.DARK, PokemonType.FIGHTING, PokemonType.ELECTRIC };
             pokemonDefinition.weaknesses =  new HashSet<PokemonType> { PokemonType.WATER };
-            pokemonDefinition.type = PokemonType.FIRE;
+            pokemonDefinition.type = PokemonType.WATER;
             pokemonDefinition.portraitFileName = "testPortrait.png";
             pokemonDefinition.retreatCost = 7;
             RenderPokemonCard(pokemonDefinition);
@@ -47,10 +50,10 @@ namespace SpecterAI.pokemonStuff
         {
             using (Image image = Image.Load(getBackgroundImage(definition)))
             {
+                renderPortrait(image, definition);
                 renderName(image, definition);
                 renderHealth(image, definition);
                 renderAttacks(image, definition);
-                renderPortrait(image, definition);
                 renderFlavorText(image, definition);
                 renderResistances(image, definition);
                 renderWeaknesses(image, definition);
@@ -104,6 +107,9 @@ namespace SpecterAI.pokemonStuff
                 case PokemonType.WATER:
                     iconPath += @"\pokemon\typeIcons\Water.png";
                     break;
+                default:
+                    iconPath += @"\pokemon\typeIcons\Normal.png";
+                    break;
             }
             return iconPath;
         }
@@ -111,18 +117,21 @@ namespace SpecterAI.pokemonStuff
         private void renderName(Image image, PokemonDefinition definition)
         {
             RectangleF boundingBox = getBoundingBox(image, 25, 3, 65, 9.25f);
-            renderText(image, defaultFont, boundingBox, definition.name);
+            textHelper.renderText(image, defaultFont, boundingBox, definition.name);
         }
 
         private void renderHealth(Image image, PokemonDefinition definition)
         {
+            // HP
             RectangleF boundingBox = getBoundingBox(image, 71, 7, 75, 9.25f);
             Font font = new Font(defaultFont, 12);
-            renderText(image, font, boundingBox, "HP");
+            textHelper.renderText(image, font, boundingBox, "HP", HorizontalAlignment.Right, VerticalAlignment.Bottom);
 
+            // Health Value
             boundingBox = getBoundingBox(image, 75, 3, 87, 9.25f);
-            font = new Font(defaultFont, 40);
-            renderText(image, font, boundingBox, definition.health + "");
+            font = new Font(defaultFont, 100);
+            textHelper.renderText(image, font, boundingBox, definition.health + "", HorizontalAlignment.Left, VerticalAlignment.Bottom);
+
         }
 
         private void renderPortrait(Image image, PokemonDefinition definition)
@@ -143,8 +152,8 @@ namespace SpecterAI.pokemonStuff
         private void renderFlavorText(Image image, PokemonDefinition definition)
         {
             RectangleF boundingBox = getBoundingBox(image, 53, 85, 83, 93);
-            Font font = new Font(defaultFont, 24);
-            renderText(image, font, boundingBox, definition.flavorText);
+            Font font = new Font(defaultFont, 100);
+            textHelper.renderText(image, font, boundingBox, definition.flavorText, HorizontalAlignment.Right, VerticalAlignment.Bottom);
         }
 
         private void renderResistances(Image image, PokemonDefinition definition)
@@ -191,24 +200,6 @@ namespace SpecterAI.pokemonStuff
             }
         }
 
-        private void renderText(Image image, Font font, RectangleF boundingBox, string text,HorizontalAlignment hAlign = HorizontalAlignment.Center, VerticalAlignment vAlign = VerticalAlignment.Center)
-        {
-            font = new Font(font, getCorrectedFontSize(image, (int)font.Size));
-            RichTextOptions options = new(font)
-            {
-                Origin = new PointF(boundingBox.X + (boundingBox.Width * 0.5f), boundingBox.Y + (boundingBox.Height * 0.5f)),
-                WrappingLength = boundingBox.Width,
-                HorizontalAlignment = hAlign,
-                VerticalAlignment = vAlign,
-                
-            };
-
-            Brush brush = Brushes.Solid(Color.Black);
-            Pen pen = Pens.Solid(Color.Black, 1);
-            //image.Mutate(x => x.DrawText(options, text, brush, pen));
-            image.Mutate(x => x.DrawText(options, text, brush));
-        }
-
         /// <summary>
         /// Returns a RectangleF with Image corrected coordinates. pX1/py1/px2/py2 are provided as percentages of the image height/width 
         /// so boxes are correctly scaled to any card dimensions
@@ -238,13 +229,7 @@ namespace SpecterAI.pokemonStuff
             return box;
         }
 
-        // Used to scale font size based on initial card blank resolution. Could have been based on any random number 
-        private float arbitraryWidthScale = 588f;
-        private int getCorrectedFontSize(Image image, int fontSize)
-        {
-            float ratio = (image.Width + 0.0f) / arbitraryWidthScale;
-            return Math.Max((int)Math.Round(ratio * fontSize), 1);
-        }
+        
 
     }
 }
