@@ -20,7 +20,9 @@ public class Program
     {
         SecretsHandler.LoadSecrets();
         PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
-        renderer.renderTest();
+        renderer.createTestAnimatedPokemonCard_gif();
+        renderer.createTestAnimatedPokemonCard_webp();
+        renderer.createTestPokemonCard();   
 
         return;
 

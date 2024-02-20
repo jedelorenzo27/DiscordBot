@@ -2,11 +2,6 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SpecterAI.helpers
 {
@@ -42,6 +37,12 @@ namespace SpecterAI.helpers
 
         public void renderText(Image image, Brush brush, Font font, RectangleF boundingBox, string text, HorizontalAlignment hAlign = HorizontalAlignment.Center, VerticalAlignment vAlign = VerticalAlignment.Top)
         {
+            if (text == null)
+            {
+                Console.WriteLine("Text was null for some reason");
+                return;
+            }
+
             font = new Font(font, getCorrectedFontSize(image, (int)font.Size));
             RichTextOptions options = new(font){};
             List<string> textLines = splitText(boundingBox, options, text);

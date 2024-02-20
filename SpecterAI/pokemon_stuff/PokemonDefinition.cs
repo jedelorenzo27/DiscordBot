@@ -15,7 +15,7 @@ namespace SpecterAI.pokemonStuff
         public int length;
         public string speciality; // optional? appears on the description bar below portrait
         public PokemonType type;
-        public PokemonAttack[] moveset;
+        public List<PokemonAttack> moveset;
         public int retreatCost;
         public string flavorText;
         public HashSet<PokemonType> weaknesses;
@@ -24,6 +24,7 @@ namespace SpecterAI.pokemonStuff
         public string resistanceStrength;
         public string portraitFileName;
         public string illustrator;
+        public CardRarity rarity = CardRarity.COMMON;
 
         public string getHealthFormatted ()
         {
@@ -35,8 +36,9 @@ namespace SpecterAI.pokemonStuff
     {
         public string name;
         public string description;
-        public int power;
-        public PokemonType[] types;
+        public string damage;
+        public int amount;
+        public PokemonType attackType;
     }
 
     public enum PokemonType
@@ -51,4 +53,12 @@ namespace SpecterAI.pokemonStuff
         STEEL,
         WATER
     }
+
+    public enum CardRarity
+    {
+        COMMON,
+        UNCOMMON,
+        RARE
+    }
+
 }
