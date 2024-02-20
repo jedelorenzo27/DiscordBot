@@ -19,12 +19,12 @@ public class Program
     public async Task MainAsync()
     {
         SecretsHandler.LoadSecrets();
-        PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
-        renderer.createTestAnimatedPokemonCard_gif();
-        renderer.createTestAnimatedPokemonCard_webp();
-        renderer.createTestPokemonCard();   
-
-        return;
+        
+        //PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
+        //renderer.createTestAnimatedPokemonCard_gif();
+        //renderer.createTestAnimatedPokemonCard_webp();
+        //renderer.createTestPokemonCard();   
+        //return;
 
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,
