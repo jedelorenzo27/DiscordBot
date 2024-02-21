@@ -54,9 +54,13 @@ public static class SecretsHandler
         return secrets[secret];
     }
 
-
     public static string DiscordToken()
     {
         return getSecret("discord_token");
+    }
+
+    public static string OpenAIApiToken()
+    {
+        return getSecret("openai_token");
     }
 }

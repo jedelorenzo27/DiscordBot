@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using SummaryAttribute = Discord.Commands.SummaryAttribute;
 using SpecterAI.pokemonStuff;
+using SpecterAI.services;
 
 public class Program
 {
@@ -19,7 +20,7 @@ public class Program
     public async Task MainAsync()
     {
         SecretsHandler.LoadSecrets();
-        
+        OpenAIServices.InitOpenAi();
         //PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
         //renderer.createTestAnimatedPokemonCard_gif();
         //renderer.createTestAnimatedPokemonCard_webp();

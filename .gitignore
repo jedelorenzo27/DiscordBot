@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /SpecterAI/resources/secrets.txt
+/SpecterAI/output/pokemon_cards/FireGuy.png

@@ -41,7 +41,7 @@ namespace SpecterAI.pokemonStuff
         {
             PokemonDefinition pokemonDefinition = new PokemonDefinition();
             pokemonDefinition.health = 100;
-            pokemonDefinition.name = "Fire Guy";
+            pokemonDefinition.name = "FireGuy";
             pokemonDefinition.length = 55;
             pokemonDefinition.weight = 12;
             pokemonDefinition.speciality = "Fire";
