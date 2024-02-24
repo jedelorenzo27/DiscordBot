@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SpecterAI
+namespace SpecterAI.Utilities
 {
-    public static class Utilities
+    public static class GeneralUtilities
     {
 
         public static string getResourceDirectory()

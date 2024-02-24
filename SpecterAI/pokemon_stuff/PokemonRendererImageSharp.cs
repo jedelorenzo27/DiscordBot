@@ -6,6 +6,7 @@ using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SpecterAI.helpers;
+using SpecterAI.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,66 +29,27 @@ namespace SpecterAI.pokemonStuff
         {
             textHelper = new TextRendererHelper();
             fontCollection = new FontCollection ();
-            FontFamily family = fontCollection.Add(Utilities.getResourceDirectory() + @"fonts\Gill-Sans-Condensed-Bold.otf");
-            FontFamily sansItalics = fontCollection.Add(Utilities.getResourceDirectory() + @"fonts\Sans-Condensed-BOLDITALIC.ttf");
-            FontFamily sansRegular = fontCollection.Add(Utilities.getResourceDirectory() + @"fonts\Sans-Condensed-Regular.ttf");
+            FontFamily family = fontCollection.Add(GeneralUtilities.getResourceDirectory() + @"fonts\Gill-Sans-Condensed-Bold.otf");
+            FontFamily sansItalics = fontCollection.Add(GeneralUtilities.getResourceDirectory() + @"fonts\Sans-Condensed-BOLDITALIC.ttf");
+            FontFamily sansRegular = fontCollection.Add(GeneralUtilities.getResourceDirectory() + @"fonts\Sans-Condensed-Regular.ttf");
 
             defaultBold = family.CreateFont(1000, FontStyle.Regular);
             defaultRegular = sansRegular.CreateFont(1000, FontStyle.Regular);
             defaultItalics = sansItalics.CreateFont(1000, FontStyle.BoldItalic);
         }
 
-        private PokemonDefinition getTestDefinition()
+        public void createTestPokemonCard(PokemonDefinition pokemonDefinition)
         {
-            PokemonDefinition pokemonDefinition = new PokemonDefinition();
-            pokemonDefinition.health = 100;
-            pokemonDefinition.name = "FireGuy";
-            pokemonDefinition.length = 55;
-            pokemonDefinition.weight = 12;
-            pokemonDefinition.speciality = "Fire";
-            pokemonDefinition.flavorText = "In the heartland of America, the stage is set for a classic baseball rivalry. This tale unfolds with two teams: the Midland Mavericks tradition,  they love.";
-            pokemonDefinition.resistances = new HashSet<PokemonType> { PokemonType.FIRE };
-            pokemonDefinition.resistanceStrength = "-10";
-            pokemonDefinition.weaknesses = new HashSet<PokemonType> { PokemonType.WATER };
-            pokemonDefinition.weaknessStrength = "+20";
-            pokemonDefinition.type = PokemonType.FIRE;
-            pokemonDefinition.portraitFileName = "testPortrait.png";
-            pokemonDefinition.retreatCost = 4;
-            pokemonDefinition.illustrator = "Jason Cole";
-            pokemonDefinition.rarity = CardRarity.RARE;
-
-            PokemonAttack attack1 = new PokemonAttack();
-            attack1.attackType = PokemonType.FIRE;
-            attack1.name = "Big attack move";
-            attack1.description = "nothing of interest here";
-            attack1.damage = "90";
-            attack1.amount = 3;
-            PokemonAttack attack2 = new PokemonAttack();
-            attack2.attackType = PokemonType.GRASS;
-            attack2.name = "Big attack move";
-            attack2.description = "nothing of interest here";
-            attack2.damage = "20+";
-            attack2.amount = 4;
-            PokemonAttack attack3 = attack1;
-            pokemonDefinition.moveset = new List<PokemonAttack>() { attack1, attack2 };
-            return pokemonDefinition;
-        }
-
-        public void createTestPokemonCard ()
-        {
-            PokemonDefinition pokemonDefinition = getTestDefinition();
             using (Image image = Image.Load(getBackgroundImage(pokemonDefinition)))
             {
                 renderPokemonCard(image, pokemonDefinition);
-                image.Save(Utilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".png");
-                //return Utilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".png";
+                image.Save(GeneralUtilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".png");
             }
         }
 
-        public void createTestAnimatedPokemonCard_gif()
+        public void createTestAnimatedPokemonCard_gif(PokemonDefinition pokemonDefinition)
         {
-            PokemonDefinition pokemonDefinition = getTestDefinition();
-            using Image gif = Image.Load(getBackgroundImage(pokemonDefinition)); 
+            using Image gif = Image.Load(getBackgroundImage(pokemonDefinition));
 
             var gifMetaData = gif.Metadata.GetGifMetadata();
             gifMetaData.RepeatCount = 0;
@@ -115,13 +77,12 @@ namespace SpecterAI.pokemonStuff
             }
             gif.Frames.RemoveFrame(0);
             // Save the final result.
-            gif.SaveAsGif(Utilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".gif");
+            gif.SaveAsGif(GeneralUtilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".gif");
         }
 
         // Discord can't display .webp format so it'll appear as a downloadable file instead. 
-        public void createTestAnimatedPokemonCard_webp()
+        public void createTestAnimatedPokemonCard_webp(PokemonDefinition pokemonDefinition)
         {
-            PokemonDefinition pokemonDefinition = getTestDefinition();
             using Image gif = Image.Load(getBackgroundImage(pokemonDefinition));
 
             var gifMetaData = gif.Metadata.GetGifMetadata();
@@ -150,7 +111,7 @@ namespace SpecterAI.pokemonStuff
             }
             gif.Frames.RemoveFrame(0);
             // Save the final result.
-            gif.SaveAsWebp(Utilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".webp");
+            gif.SaveAsWebp(GeneralUtilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".webp");
         }
 
         private void renderPokemonCard(Image image, PokemonDefinition definition)
@@ -170,7 +131,7 @@ namespace SpecterAI.pokemonStuff
 
         private string getBackgroundImage(PokemonDefinition definition)
         {
-            string baseDirectory = Utilities.getResourceDirectory() + @"pokemon\cardBlanks\";
+            string baseDirectory = GeneralUtilities.getResourceDirectory() + @"pokemon\cardBlanks\";
             switch (definition.type)
             {
                 case PokemonType.FIRE:
@@ -182,7 +143,7 @@ namespace SpecterAI.pokemonStuff
 
         private string getTypeIconFilePath(PokemonType type)
         {
-            string iconPath = Utilities.getResourceDirectory();
+            string iconPath = GeneralUtilities.getResourceDirectory();
             switch(type)
             {
                 case PokemonType.DARK:
@@ -270,7 +231,7 @@ namespace SpecterAI.pokemonStuff
 
         private void renderPortrait(Image image, PokemonDefinition definition)
         {
-            using (Image portrait = Image.Load(Utilities.getPokemonPortraitsDirectory() + definition.portraitFileName))
+            using (Image portrait = Image.Load(GeneralUtilities.getPokemonPortraitsDirectory() + definition.portraitFileName))
             {
                 RectangleF boundingBox = getBoundingBox(image, 11.75f, 12.5f, 87.75f, 51.25f);
                 portrait.Mutate(o => o.Resize(new Size((int)boundingBox.Width, (int)boundingBox.Height)));
@@ -468,7 +429,7 @@ namespace SpecterAI.pokemonStuff
         {
             RectangleF boundingBox = getBoundingBox(image, 92f, 94.5f, 95.25f, 96.5f);
 
-            string iconPath = Utilities.getResourceDirectory();
+            string iconPath = GeneralUtilities.getResourceDirectory();
             switch (definition.rarity)
             {
                 case CardRarity.COMMON:

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SummaryAttribute = Discord.Commands.SummaryAttribute;
 using SpecterAI.pokemonStuff;
 using SpecterAI.services;
+using System.Net;
 
 public class Program
 {
@@ -14,13 +15,14 @@ public class Program
     private CommandService _commands;
     private InteractionService _interactions;
     private IServiceProvider _services;
-
+    public static HttpClient _httpClient;
     public static async Task Main(string[] args) => await new Program().MainAsync();
 
     public async Task MainAsync()
     {
+        _httpClient = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate });
         SecretsHandler.LoadSecrets();
-        OpenAIServices.InitOpenAi();
+
         //PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
         //renderer.createTestAnimatedPokemonCard_gif();
         //renderer.createTestAnimatedPokemonCard_webp();

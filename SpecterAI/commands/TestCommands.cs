@@ -1,4 +1,5 @@
 ﻿using Discord.Commands;
+using Discord.Interactions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,12 @@ using System.Threading.Tasks;
 
 namespace SpecterAI.commands
 {
-    public class TestCommands : ModuleBase<SocketCommandContext>
+    public class TestCommands : InteractionModuleBase<SocketInteractionContext>
     {
-        [Command("beans")]
-        [Summary("Echoes the input back to you.")]
-        public async Task EchoAsync([Remainder] string input)
+        [SlashCommand("test", "Implement with whatever neeeds testing")]
+        public async Task testCommand(string input1, string input2)
         {
-            Console.WriteLine($"Echo {input}");
-            await ReplyAsync(input);
+            await ReplyAsync("For testing new slash commands while waiting for the UI to update - Currently does nothing");
         }
     }
 }

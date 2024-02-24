@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using SpecterAI.services;
+using System.Diagnostics;
+using SpecterAI.Utilities;
 
 namespace SpecterAI.commands
 {
@@ -17,36 +19,23 @@ namespace SpecterAI.commands
         [SlashCommand("pokemon2", "Does nothing")]
         public async Task PokemonHello(string name)
         {
-
-            string response = await OpenAIServices.Chat(name);
-            await RespondAsync(response);
-            return;
-
-
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             await DeferAsync();
-            Thread.Sleep(1000);
-            for(int i = 0; i < 5; i++)
-            {
-                Thread.Sleep(1000);
-                Action<MessageProperties> action2 = (x) => x.Content = "Second: " + i;
-                await ModifyOriginalResponseAsync(action2);
-            }
 
-            
+            //await OpenAIServices.Chat(new Conversation(), name);
+            PokemonGenerator generator = new PokemonGenerator();
             PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
-            renderer.createTestPokemonCard();
-            FileAttachment renderedCard = new FileAttachment(Utilities.getRenderedPokemonCardsDirectory() + "FireGuy.png");
-
+            renderer.createTestPokemonCard(generator.getTestDefinition());
+            FileAttachment renderedCard = new FileAttachment(GeneralUtilities.getRenderedPokemonCardsDirectory() + "FireGuy.png");
             LinkedList<FileAttachment> list = new LinkedList<FileAttachment>();
             list.AddFirst(renderedCard);
-
             Action<MessageProperties> action = (x) => { x.Attachments = list; x.Content = "done"; };
             await ModifyOriginalResponseAsync(action);
 
-            //Console.WriteLine("Returning pokemon card");
-            //Console.WriteLine(renderedCard.FileName);
-            //await RespondWithFileAsync(renderedCard);
+            stopwatch.Stop();
+            await FollowupAsync("Completed in " + stopwatch.ElapsedMilliseconds / 1000.0f + " seconds.");
         }
     }
 }
