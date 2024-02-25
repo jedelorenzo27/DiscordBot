@@ -45,7 +45,7 @@ namespace SpecterAI.commands
             await ModifyOriginalResponseAsync(action);
 
             string response = await OpenAIServices.Image(Program._httpClient, prompt);
-            string fileLocation = GeneralUtilities.getOutputDirectory() + @"temp\" + response;
+            string fileLocation = GeneralUtilities.outputDirectory + @"temp\" + response;
 
             if (File.Exists(fileLocation) || true)
             {

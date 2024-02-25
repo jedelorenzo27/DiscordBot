@@ -9,24 +9,37 @@ namespace SpecterAI.Utilities
     public static class GeneralUtilities
     {
 
-        public static string getResourceDirectory()
+
+        public static string resourceDirector
         {
-            return getRootDirectory() + @"\resources\";
+            get
+            {
+                return getRootDirectory() + @"\resources\";
+            }
         }
 
-        public static string getOutputDirectory ()
+        public static string outputDirectory
         {
-            return getRootDirectory() + @"\output\";
+            get
+            {
+                return getRootDirectory() + @"\output\";
+            }
         }
 
-        public static string getPokemonPortraitsDirectory()
+        public static string pokemonPortraitsDirectory
         {
-            return getOutputDirectory() + @"\pokemon_portraits\";
+            get
+            {
+                return getRootDirectory() + @"\pokemon_portraits\";
+            }
         }
 
-        public static string getRenderedPokemonCardsDirectory()
+        public static string renderedPokemonCardsDirectory
         {
-            return getOutputDirectory() + @"\pokemon_cards\";
+            get
+            {
+                return getRootDirectory() + @"\pokemon_cards\";
+            }
         }
 
         private static string getRootDirectory()

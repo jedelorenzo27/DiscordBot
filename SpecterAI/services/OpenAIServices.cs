@@ -158,7 +158,7 @@ namespace SpecterAI.services
 
                     byte[] bytes = await res.Content.ReadAsByteArrayAsync();
                     string tempImageName = "image1234.png";
-                    await HttpUtilities.DownloadFileAsync(client, imageURL, GeneralUtilities.getOutputDirectory() + @"temp\" + tempImageName);
+                    await HttpUtilities.DownloadFileAsync(client, imageURL, GeneralUtilities.outputDirectory + @"temp\" + tempImageName);
                     return tempImageName;
                 }
                 catch (Exception ex)

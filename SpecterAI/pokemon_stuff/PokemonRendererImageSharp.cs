@@ -29,9 +29,9 @@ namespace SpecterAI.pokemonStuff
         {
             textHelper = new TextRendererHelper();
             fontCollection = new FontCollection ();
-            FontFamily family = fontCollection.Add(GeneralUtilities.getResourceDirectory() + @"fonts\Gill-Sans-Condensed-Bold.otf");
-            FontFamily sansItalics = fontCollection.Add(GeneralUtilities.getResourceDirectory() + @"fonts\Sans-Condensed-BOLDITALIC.ttf");
-            FontFamily sansRegular = fontCollection.Add(GeneralUtilities.getResourceDirectory() + @"fonts\Sans-Condensed-Regular.ttf");
+            FontFamily family = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts\Gill-Sans-Condensed-Bold.otf");
+            FontFamily sansItalics = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts\Sans-Condensed-BOLDITALIC.ttf");
+            FontFamily sansRegular = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts\Sans-Condensed-Regular.ttf");
 
             defaultBold = family.CreateFont(1000, FontStyle.Regular);
             defaultRegular = sansRegular.CreateFont(1000, FontStyle.Regular);
@@ -43,7 +43,7 @@ namespace SpecterAI.pokemonStuff
             using (Image image = Image.Load(getBackgroundImage(pokemonDefinition)))
             {
                 renderPokemonCard(image, pokemonDefinition);
-                image.Save(GeneralUtilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".png");
+                image.Save(GeneralUtilities.outputDirectory + @"pokemon_cards\" + pokemonDefinition.name + ".png");
             }
         }
 
@@ -77,7 +77,7 @@ namespace SpecterAI.pokemonStuff
             }
             gif.Frames.RemoveFrame(0);
             // Save the final result.
-            gif.SaveAsGif(GeneralUtilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".gif");
+            gif.SaveAsGif(GeneralUtilities.outputDirectory + @"pokemon_cards\" + pokemonDefinition.name + ".gif");
         }
 
         // Discord can't display .webp format so it'll appear as a downloadable file instead. 
@@ -111,7 +111,7 @@ namespace SpecterAI.pokemonStuff
             }
             gif.Frames.RemoveFrame(0);
             // Save the final result.
-            gif.SaveAsWebp(GeneralUtilities.getOutputDirectory() + @"pokemon_cards\" + pokemonDefinition.name + ".webp");
+            gif.SaveAsWebp(GeneralUtilities.outputDirectory + @"pokemon_cards\" + pokemonDefinition.name + ".webp");
         }
 
         private void renderPokemonCard(Image image, PokemonDefinition definition)
@@ -131,7 +131,7 @@ namespace SpecterAI.pokemonStuff
 
         private string getBackgroundImage(PokemonDefinition definition)
         {
-            string baseDirectory = GeneralUtilities.getResourceDirectory() + @"pokemon\cardBlanks\";
+            string baseDirectory = GeneralUtilities.resourceDirector + @"pokemon\cardBlanks\";
             switch (definition.type)
             {
                 case PokemonType.FIRE:
@@ -143,7 +143,7 @@ namespace SpecterAI.pokemonStuff
 
         private string getTypeIconFilePath(PokemonType type)
         {
-            string iconPath = GeneralUtilities.getResourceDirectory();
+            string iconPath = GeneralUtilities.resourceDirector;
             switch(type)
             {
                 case PokemonType.DARK:
@@ -231,7 +231,7 @@ namespace SpecterAI.pokemonStuff
 
         private void renderPortrait(Image image, PokemonDefinition definition)
         {
-            using (Image portrait = Image.Load(GeneralUtilities.getPokemonPortraitsDirectory() + definition.portraitFileName))
+            using (Image portrait = Image.Load(GeneralUtilities.pokemonPortraitsDirectory + definition.portraitFileName))
             {
                 RectangleF boundingBox = getBoundingBox(image, 11.75f, 12.5f, 87.75f, 51.25f);
                 portrait.Mutate(o => o.Resize(new Size((int)boundingBox.Width, (int)boundingBox.Height)));
@@ -429,7 +429,7 @@ namespace SpecterAI.pokemonStuff
         {
             RectangleF boundingBox = getBoundingBox(image, 92f, 94.5f, 95.25f, 96.5f);
 
-            string iconPath = GeneralUtilities.getResourceDirectory();
+            string iconPath = GeneralUtilities.resourceDirector;
             switch (definition.rarity)
             {
                 case CardRarity.COMMON:

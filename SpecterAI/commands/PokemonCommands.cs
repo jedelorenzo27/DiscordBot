@@ -28,7 +28,7 @@ namespace SpecterAI.commands
             PokemonGenerator generator = new PokemonGenerator();
             PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
             renderer.createTestPokemonCard(generator.getTestDefinition());
-            FileAttachment renderedCard = new FileAttachment(GeneralUtilities.getRenderedPokemonCardsDirectory() + "FireGuy.png");
+            FileAttachment renderedCard = new FileAttachment(GeneralUtilities.renderedPokemonCardsDirectory + "FireGuy.png");
             LinkedList<FileAttachment> list = new LinkedList<FileAttachment>();
             list.AddFirst(renderedCard);
             Action<MessageProperties> action = (x) => { x.Attachments = list; x.Content = "done"; };
