@@ -40,30 +40,31 @@ namespace SpecterAI.commands
         public async Task OpenAiImage(string prompt)
         {
             Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             await DeferAsync();
-            Action<MessageProperties> action = (x) => { x.Content = "Generating image..."; };
+            Action<MessageProperties>? action = (x) => { x.Content = "Generating image..."; };
             await ModifyOriginalResponseAsync(action);
 
-            string response = await OpenAIServices.Image(Program._httpClient, prompt);
+            string response = await OpenAIServices.Image(Program._httpClient, "I NEED to test how the tool works with extremely simple prompts. DO NOT add any detail, just use it AS-IS: " + prompt);
             string fileLocation = GeneralUtilities.outputDirectory + @"temp\" + response;
 
             if (File.Exists(fileLocation) || true)
             {
                 action = (x) => { x.Content = "Uploading image to discord..."; };
                 await ModifyOriginalResponseAsync(action);
-
-
                 FileAttachment image = new FileAttachment(fileLocation);
-                LinkedList<FileAttachment> list = new LinkedList<FileAttachment>();
-                list.AddFirst(image);
-                action = (x) => { x.Attachments = list; x.Content = "..."; };
+                List<FileAttachment> list = new List<FileAttachment>();
+                list.Add(image);
+                stopwatch.Stop();
+                action = (x) => { x.Attachments = list; x.Content = "Completed in " + stopwatch.ElapsedMilliseconds / 1000.0f + " seconds"; };
                 await ModifyOriginalResponseAsync(action);
+                image.Dispose();
             } else
             {
                 action = (x) => { x.Content = "Something went wrong with: " + response + @". Can't find location: " + fileLocation; };
                 await ModifyOriginalResponseAsync(action);
             }
-            stopwatch.Stop();
+            
         }
 
     }

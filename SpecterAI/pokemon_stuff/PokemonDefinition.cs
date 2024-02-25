@@ -9,6 +9,12 @@ namespace SpecterAI.pokemonStuff
     //https://card-pokemon.com/
     public class PokemonDefinition
     {
+        /// <summary>
+        /// Used to render a portrait
+        /// </summary>
+        public string description;
+        
+        
         public string name;
         public int health;
         public int weight;

@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using Discord;
+using Discord.Interactions;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SpecterAI.pokemonStuff;
 using System;
@@ -47,9 +49,29 @@ namespace SpecterAI
             return pokemonDefinition;
         }
 
-       
+        public async Task<PokemonDefinition> generateAiPokemonDefinition(SocketInteractionContext context, string name)
+        {
+            Action<MessageProperties> action = (x) => { x.Content = "Gathering definition information..."; };
+            await context.Interaction.ModifyOriginalResponseAsync(action);
+            PokemonDefinition definition = new PokemonDefinition();
+            definition.name = name;
+
+
+            action = (x) => { x.Content = "Gathering information about pokemon size..."; };
+            await context.Interaction.ModifyOriginalResponseAsync(action);
+            definition.length = 55;
+            definition.weight = 12;
 
 
 
+
+
+
+
+
+
+
+            return definition;
+        }   
     }
 }

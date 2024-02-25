@@ -24,10 +24,12 @@ namespace SpecterAI.commands
 
             await DeferAsync();
 
-            //await OpenAIServices.Chat(new Conversation(), name);
             PokemonGenerator generator = new PokemonGenerator();
+            PokemonDefinition definition = await generator.generateAiPokemonDefinition(Context, name);
+
             PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
-            renderer.createTestPokemonCard(generator.getTestDefinition());
+            renderer.createTestPokemonCard(definition);
+
             FileAttachment renderedCard = new FileAttachment(GeneralUtilities.renderedPokemonCardsDirectory + "FireGuy.png");
             LinkedList<FileAttachment> list = new LinkedList<FileAttachment>();
             list.AddFirst(renderedCard);

@@ -100,7 +100,7 @@ namespace SpecterAI.services
                     messages = conversation.conversationArray,
                     temperature = 0.7,
                     max_tokens = 60,
-                    model = "gpt-4"
+                    model = "gpt-4-0125-preview"
                 };
 
                 var jsonContent = JsonConvert.SerializeObject(requestData);
@@ -132,6 +132,7 @@ namespace SpecterAI.services
                 Console.WriteLine("Get image from OpenAI");
                 var requestData = new
                 {
+                    model = "dall-e-3",
                     prompt = prompt,
                     num_images = 1,
                     size = "1024x1024"
@@ -144,9 +145,9 @@ namespace SpecterAI.services
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAIApiToken());
                 requestMessage.Content = contentString;
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
-
-
-                Console.Write(responseMessage.Content);
+                Console.WriteLine(responseMessage);
+                Console.WriteLine("\n\n");    
+                Console.WriteLine(responseMessage.Content);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
                 try
                 {
@@ -157,7 +158,7 @@ namespace SpecterAI.services
                     var res = await client.GetAsync(imageURL);
 
                     byte[] bytes = await res.Content.ReadAsByteArrayAsync();
-                    string tempImageName = "image1234.png";
+                    string tempImageName = "tempimage.png";
                     await HttpUtilities.DownloadFileAsync(client, imageURL, GeneralUtilities.outputDirectory + @"temp\" + tempImageName);
                     return tempImageName;
                 }
