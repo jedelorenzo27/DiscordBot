@@ -146,8 +146,6 @@ namespace SpecterAI.services
                 requestMessage.Content = contentString;
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
                 Console.WriteLine(responseMessage);
-                Console.WriteLine("\n\n");    
-                Console.WriteLine(responseMessage.Content);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
                 try
                 {
