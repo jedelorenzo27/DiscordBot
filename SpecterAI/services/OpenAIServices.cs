@@ -99,18 +99,16 @@ namespace SpecterAI.services
                 {
                     messages = conversation.conversationArray,
                     temperature = 0.7,
-                    max_tokens = 60,
+                    max_tokens = 300,
                     model = "gpt-4-0125-preview"
                 };
 
                 var jsonContent = JsonConvert.SerializeObject(requestData);
                 var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAIApiToken());
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAiApiToken);
                 requestMessage.Content = contentString;
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
-                Console.Write(responseMessage.Content);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
                 try
                 {
@@ -141,8 +139,7 @@ namespace SpecterAI.services
                 var jsonContent = JsonConvert.SerializeObject(requestData);
                 var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAIApiToken());
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAiApiToken);
                 requestMessage.Content = contentString;
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
                 Console.WriteLine(responseMessage);
@@ -157,7 +154,7 @@ namespace SpecterAI.services
 
                     byte[] bytes = await res.Content.ReadAsByteArrayAsync();
                     string tempImageName = "tempimage.png";
-                    await HttpUtilities.DownloadFileAsync(client, imageURL, GeneralUtilities.outputDirectory + @"temp\" + tempImageName);
+                    await HttpUtilities.DownloadFileAsync(client, imageURL, GeneralUtilities.outputDirectory + @"temp" + Path.DirectorySeparatorChar + tempImageName);
                     return tempImageName;
                 }
                 catch (Exception ex)

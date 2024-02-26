@@ -68,7 +68,7 @@ public class Program
         _client.InteractionCreated += HandleInteractionAsync;
 
 
-        string token = SecretsHandler.DiscordToken();
+        string token = SecretsHandler.DiscordToken;
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
 

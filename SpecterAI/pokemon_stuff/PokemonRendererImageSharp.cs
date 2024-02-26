@@ -29,9 +29,9 @@ namespace SpecterAI.pokemonStuff
         {
             textHelper = new TextRendererHelper();
             fontCollection = new FontCollection ();
-            FontFamily family = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts\Gill-Sans-Condensed-Bold.otf");
-            FontFamily sansItalics = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts\Sans-Condensed-BOLDITALIC.ttf");
-            FontFamily sansRegular = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts\Sans-Condensed-Regular.ttf");
+            FontFamily family = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts" + Path.DirectorySeparatorChar + "Gill-Sans-Condensed-Bold.otf");
+            FontFamily sansItalics = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts" + Path.DirectorySeparatorChar + "Sans-Condensed-BOLDITALIC.ttf");
+            FontFamily sansRegular = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts" + Path.DirectorySeparatorChar + "Sans-Condensed-Regular.ttf");
 
             defaultBold = family.CreateFont(1000, FontStyle.Regular);
             defaultRegular = sansRegular.CreateFont(1000, FontStyle.Regular);
@@ -43,7 +43,7 @@ namespace SpecterAI.pokemonStuff
             using (Image image = Image.Load(getBackgroundImage(pokemonDefinition)))
             {
                 renderPokemonCard(image, pokemonDefinition);
-                image.Save(GeneralUtilities.outputDirectory + @"pokemon_cards\" + pokemonDefinition.name + ".png");
+                image.Save(GeneralUtilities.outputDirectory + @"pokemon_cards" + Path.DirectorySeparatorChar + pokemonDefinition.name + ".png");
             }
         }
 
@@ -77,7 +77,7 @@ namespace SpecterAI.pokemonStuff
             }
             gif.Frames.RemoveFrame(0);
             // Save the final result.
-            gif.SaveAsGif(GeneralUtilities.outputDirectory + @"pokemon_cards\" + pokemonDefinition.name + ".gif");
+            gif.SaveAsGif(GeneralUtilities.outputDirectory + @"pokemon_cards" + Path.DirectorySeparatorChar + pokemonDefinition.name + ".gif");
         }
 
         // Discord can't display .webp format so it'll appear as a downloadable file instead. 
@@ -143,38 +143,38 @@ namespace SpecterAI.pokemonStuff
 
         private string getTypeIconFilePath(PokemonType type)
         {
-            string iconPath = GeneralUtilities.resourceDirector;
+            string iconPath = GeneralUtilities.resourceDirector + "pokemon" + Path.DirectorySeparatorChar + "typeIcons" + Path.DirectorySeparatorChar;
             switch(type)
             {
                 case PokemonType.DARK:
-                    iconPath += @"\pokemon\typeIcons\Dark.png";
+                    iconPath += "Dark.png";
                     break;
                 case PokemonType.ELECTRIC:
-                    iconPath += @"\pokemon\typeIcons\Electric.png";
+                    iconPath += "Electric.png";
                     break;
                 case PokemonType.FIGHTING:
-                    iconPath += @"\pokemon\typeIcons\Fighting.png";
+                    iconPath += "Fighting.png";
                     break;
                 case PokemonType.FIRE:
-                    iconPath += @"\pokemon\typeIcons\Fire.png";
+                    iconPath += "Fire.png";
                     break;
                 case PokemonType.GRASS:
-                    iconPath += @"\pokemon\typeIcons\Grass.png";
+                    iconPath += "Grass.png";
                     break;
                 case PokemonType.NORMAL:
-                    iconPath += @"\pokemon\typeIcons\Normal.png";
+                    iconPath += "Normal.png";
                     break;
                 case PokemonType.PSYCHIC:
-                    iconPath += @"\pokemon\typeIcons\Psychic.png";
+                    iconPath += "Psychic.png";
                     break;
                 case PokemonType.STEEL:
-                    iconPath += @"\pokemon\typeIcons\Steel.png";
+                    iconPath += "Steel.png";
                     break;
                 case PokemonType.WATER:
-                    iconPath += @"\pokemon\typeIcons\Water.png";
+                    iconPath += "Water.png";
                     break;
                 default:
-                    iconPath += @"\pokemon\typeIcons\Normal.png";
+                    iconPath += "Normal.png";
                     break;
             }
             return iconPath;
@@ -433,15 +433,16 @@ namespace SpecterAI.pokemonStuff
             switch (definition.rarity)
             {
                 case CardRarity.COMMON:
-                    iconPath += @"\pokemon\miscellaneous_icons\rarity_common.png";
+                    iconPath += @"" + Path.DirectorySeparatorChar + "pokemon" + Path.DirectorySeparatorChar + "miscellaneous_icons" + Path.DirectorySeparatorChar + "rarity_common.png";
                     break;
 
                 case CardRarity.UNCOMMON:
-                    iconPath += @"\pokemon\miscellaneous_icons\rarity_uncommon.png";
+                    iconPath += @"" + Path.DirectorySeparatorChar + "pokemon" + Path.DirectorySeparatorChar + "miscellaneous_icons" + Path.DirectorySeparatorChar + "rarity_uncommon.png";
                     break;
 
                 case CardRarity.RARE:
-                    iconPath += @"\pokemon\miscellaneous_icons\rarity_rare.png";
+                    
+                    iconPath += @"" + Path.DirectorySeparatorChar + "pokemon" + Path.DirectorySeparatorChar + "miscellaneous_icons" + Path.DirectorySeparatorChar + "rarity_rare.png";
                     break;
             }
 

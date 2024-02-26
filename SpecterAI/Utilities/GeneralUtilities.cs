@@ -14,7 +14,7 @@ namespace SpecterAI.Utilities
         {
             get
             {
-                return getRootDirectory() + @"\resources\";
+                return getRootDirectory() + Path.DirectorySeparatorChar + "resources" + Path.DirectorySeparatorChar;
             }
         }
 
@@ -22,7 +22,7 @@ namespace SpecterAI.Utilities
         {
             get
             {
-                return getRootDirectory() + @"\output\";
+                return getRootDirectory() + Path.DirectorySeparatorChar + "output" + Path.DirectorySeparatorChar;
             }
         }
 
@@ -30,7 +30,7 @@ namespace SpecterAI.Utilities
         {
             get
             {
-                return getRootDirectory() + @"\pokemon_portraits\";
+                return getRootDirectory() + Path.DirectorySeparatorChar + "pokemon_portraits" + Path.DirectorySeparatorChar;
             }
         }
 
@@ -38,7 +38,7 @@ namespace SpecterAI.Utilities
         {
             get
             {
-                return getRootDirectory() + @"\pokemon_cards\";
+                return getRootDirectory() + Path.DirectorySeparatorChar + "pokemon_cards" + Path.DirectorySeparatorChar;
             }
         }
 

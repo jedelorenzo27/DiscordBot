@@ -14,7 +14,7 @@ public static class SecretsHandler
         secrets = new Dictionary<string, string>();
         Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
         String Root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-        string secretsFile = Root + @"/resources/secrets.txt";
+        string secretsFile = Root + Path.DirectorySeparatorChar + "resources" + Path.DirectorySeparatorChar + "secrets.txt";
         if (!File.Exists(secretsFile))
         {
             for(int i = 0; i < 50; i++)
@@ -54,13 +54,19 @@ public static class SecretsHandler
         return secrets[secret];
     }
 
-    public static string DiscordToken()
+    public static string DiscordToken
     {
-        return getSecret("discord_token");
+        get
+        {
+            return getSecret("discord_token");
+        }
     }
 
-    public static string OpenAIApiToken()
+    public static string OpenAiApiToken
     {
-        return getSecret("openai_token");
+        get
+        {
+            return getSecret("openai_token");
+        }
     }
 }
