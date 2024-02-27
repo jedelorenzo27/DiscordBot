@@ -27,7 +27,17 @@ namespace SpecterAI.commands
         public async Task ViewPermissions(string user_id)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.ViewPermissions);
-            await RespondAsync($"User ({PermissionsService.GetNameFromId(user_id)}) has the following permissions: " + string.Join(", ", PermissionsService.GetUserEntitlements(user_id)));
+
+            Entitlement[] entitlements = PermissionsService.GetUserEntitlements(user_id);
+            string response = "";
+            if (entitlements.Length > 0)
+            {
+                response = $"User ({PermissionsService.GetNameFromId(user_id)}) has the following permissions: " + string.Join(", ", entitlements);
+            } else
+            {
+                response = $"{PermissionsService.GetNameFromId(user_id)} is powerless";
+            }
+            await RespondAsync(response);
         }
 
         [SlashCommand("permissions-view-usage", "Returns usage stats for a given user.")]
@@ -90,8 +100,5 @@ namespace SpecterAI.commands
             await PermissionsService.Ban(Context, id);
             await RespondAsync("Done");
         }
-
-        
-
     }
 }

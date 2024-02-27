@@ -128,14 +128,14 @@ namespace SpecterAI.services
             }
         }
 
-        private static Dictionary<string, HashSet<Entitlement>> permissions = new Dictionary<string, HashSet<Entitlement>>();
-        private static HashSet<string> bannedUsers = new HashSet<string>();
-        private static Dictionary<string, UserMetadata> userMetadata = new Dictionary<string, UserMetadata>();
-
+        private static Dictionary<string, HashSet<Entitlement>> _permissions = new Dictionary<string, HashSet<Entitlement>>();
+        private static HashSet<string> _bannedUsers = new HashSet<string>();
+        private static Dictionary<string, UserMetadata> _userMetadata = new Dictionary<string, UserMetadata>();
+        private static Random _random = new Random();
         public static void LoadPermissions()
         {
-            permissions = new Dictionary<string, HashSet<Entitlement>>();
-            bannedUsers = new HashSet<string>();
+            _permissions = new Dictionary<string, HashSet<Entitlement>>();
+            _bannedUsers = new HashSet<string>();
             LoadUserPermissions();
             LoadBannedUsers();
             LoadMetadata();
@@ -143,78 +143,86 @@ namespace SpecterAI.services
 
         public static string GetNameFromId(string user_id)
         {
-            if (userMetadata.ContainsKey(user_id))
+            if (_userMetadata.ContainsKey(user_id))
             {
-                return userMetadata[user_id].Name;
+                return _userMetadata[user_id].Name;
             }
             return user_id;
         }
 
         public static async Task GrantPermission(SocketInteractionContext context, string idToGiveEntitlement, Entitlement entitlement)
         {
-            if (!permissions.ContainsKey(idToGiveEntitlement))
+            if (!_permissions.ContainsKey(idToGiveEntitlement))
             {
                 await LoggingService.LogMessage(LogLevel.Info, $"Granting permission ({EnumExtensions.ToDescriptionString(entitlement)}) to user:{GetNameFromId(idToGiveEntitlement)}");
-                permissions.Add(idToGiveEntitlement, new HashSet<Entitlement>());
+                _permissions.Add(idToGiveEntitlement, new HashSet<Entitlement>());
             } else
             {
                 await LoggingService.LogMessage(LogLevel.Info, $"user:{GetNameFromId(idToGiveEntitlement)} already has ${EnumExtensions.ToDescriptionString(entitlement)}");
             }
-            permissions[idToGiveEntitlement].Add(entitlement);
+            _permissions[idToGiveEntitlement].Add(entitlement);
             SaveUserPermissions();
         }
 
         public static async Task RemovePermission(SocketInteractionContext context, string idToRemoveEntitlement, Entitlement entitlement)
         {
-            if (permissions.ContainsKey(idToRemoveEntitlement))
+            if (_permissions.ContainsKey(idToRemoveEntitlement))
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"Removing permission (${EnumExtensions.ToDescriptionString(entitlement)}) from user:{GetNameFromId(idToRemoveEntitlement)}");
-                permissions[idToRemoveEntitlement].Remove(entitlement);
+                // Only another unbannable can revoke the permissions of an unbannable (for debug purposes)
+                if (unbannable.Contains(idToRemoveEntitlement) && !unbannable.Contains(context.User.Id.ToString()))
+                {
+                    await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} ({context.User.Id.ToString()}) tried to revoke permissions from {GetNameFromId(idToRemoveEntitlement)}");
+                } else
+                {
+                    await LoggingService.LogMessage(LogLevel.Info, $"Removing permission ({EnumExtensions.ToDescriptionString(entitlement)}) from user:{GetNameFromId(idToRemoveEntitlement)}");
+                    _permissions[idToRemoveEntitlement].Remove(entitlement);
+                    SaveUserPermissions();
+                }
             } else
             {
                 await LoggingService.LogMessage(LogLevel.Info, $"Could not remove permission as (user:{GetNameFromId(idToRemoveEntitlement)}) does not have ${EnumExtensions.ToDescriptionString(entitlement)}");
             }
-            SaveUserPermissions();
-            throw new UnauthorizedException();
+            
         }
 
         public static async Task Ban(SocketInteractionContext context, string idToBan)
         {
             if (unbannable.Contains(idToBan))
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"A user ({GetNameFromId(context.User.Id.ToString())}:{context.User.Id}) tried to ban and unbannable ({GetNameFromId(idToBan)}) user");
+                await LoggingService.LogMessage(LogLevel.Info, $"A user ({GetNameFromId(context.User.Id.ToString())}:{context.User.Id}) tried to ban an unbannable ({GetNameFromId(idToBan)}) user");
+                await context.Interaction.RespondAsync(GetDeniedMessageForBanningUnbannable(context.User.Id.ToString()));
                 return;
             }
             await LoggingService.LogMessage(LogLevel.Info, $"Banning user: {GetNameFromId(idToBan)}");
-            bannedUsers.Add(idToBan);
+            _bannedUsers.Add(idToBan);
             SaveBannedUsers();
         }
 
         public static Entitlement[] GetUserEntitlements(string id)
         {
-            if (permissions.ContainsKey(id))
+            if (_permissions.ContainsKey(id))
             {
-                return permissions[id].ToArray();
+                return _permissions[id].ToArray();
             }
             return new Entitlement[0];
         }
 
         public static Dictionary<Entitlement, int>? GetEntitlementUsage(SocketInteractionContext context, string id)
         {
-            if (userMetadata.ContainsKey(id))
+            if (_userMetadata.ContainsKey(id))
             {
-                return userMetadata[id].requests;
+                return _userMetadata[id].requests;
             }
             return null;
         }
 
         private static void recordPermissionCheck(string id, string name, Entitlement entitlement)
         {
-            if (!userMetadata.ContainsKey(id)) 
+            if (!_userMetadata.ContainsKey(id)) 
             {
-                userMetadata.Add(id, new UserMetadata(name, id));
+                _userMetadata.Add(id, new UserMetadata(name, id));
             }
-            userMetadata[id].IncrementEntitlementCount(entitlement);
+            _userMetadata[id].IncrementEntitlementCount(entitlement);
             SaveMetadata();
         }
 
@@ -223,25 +231,78 @@ namespace SpecterAI.services
             recordPermissionCheck(context.User.Id.ToString(), context.User.Username, entitlement);
             recordPermissionCheck(context.Guild.Id.ToString(), context.Guild.Name, entitlement);
 
-            if (bannedUsers.Contains(context.User.Id.ToString())) {
+            if (_bannedUsers.Contains(context.User.Id.ToString())) {
+                await context.Interaction.RespondAsync(GetDeniedMessageForBannedUser(context.User.Id.ToString()));
                 throw new BannedException();
             }
 
-            if (permissions.ContainsKey(context.Guild.Id.ToString())
-                && (permissions[context.Guild.Id.ToString()].Contains(entitlement)
-                || permissions[context.Guild.Id.ToString()].Contains(Entitlement.All)))
+            if (_permissions.ContainsKey(context.Guild.Id.ToString())
+                && (_permissions[context.Guild.Id.ToString()].Contains(entitlement)
+                || _permissions[context.Guild.Id.ToString()].Contains(Entitlement.All)))
             {
                 return true;
             }
 
-            if (permissions.ContainsKey(context.User.Id.ToString())
-                && (permissions[context.User.Id.ToString()].Contains(entitlement)
-                || permissions[context.User.Id.ToString()].Contains(Entitlement.All)))
+            if (_permissions.ContainsKey(context.User.Id.ToString())
+                && (_permissions[context.User.Id.ToString()].Contains(entitlement)
+                || _permissions[context.User.Id.ToString()].Contains(Entitlement.All)))
             {
                 return true;
             }
-            await context.Interaction.RespondAsync($"User {GetNameFromId(context.User.Id.ToString())} is unauthorized to use " + EnumExtensions.ToDescriptionString(entitlement));
+            await context.Interaction.RespondAsync(GetDeniedMessageForUnauthrorizedUser(context.User.Id.ToString()));
             throw new UnauthorizedException();
+        }
+
+        private static string GetDeniedMessageForUnauthrorizedUser(string userId)
+        {
+            string[] possibleResponse = new string[] {
+                $"Come on, {GetNameFromId(userId)}. You're not fooling anyone around here. We both know you ain't got the permissions do that.",
+                "Say please",
+                "Try asking someone for more permissions or granting them to yourself",
+                $"{GetNameFromId(userId)}, ain't you learned by now you cain't do that",
+                $"{GetNameFromId(userId)}, no.",
+                "No.",
+                "!! Access denied !!",
+                "Unauthorized access has been reported and logged",
+                "You're not yet strong enough to do that",
+                "You'll have to grow stronger",
+                "erm, lets not continue this relationship.",
+                "Cancelling request",
+                "It'd be better if you didn't do that",
+                "We've thought about this long and hard and come to the conclusion that you're just not ready for this kind of responsibility.",
+                "Sorry bud, can't do that",
+                $"{GetNameFromId(userId)}, please don't make this harder than it needs to be",
+                "Lol, is this Xander?"
+            };
+
+            return possibleResponse[_random.Next(possibleResponse.Length)];
+            
+        }
+
+        private static string GetDeniedMessageForBannedUser(string userId)
+        {
+            string[] possibleResponse = new string[] {
+                "You really be out here tryna make calls when you know you're banned?",
+                "Ur kind ain't welcome round these parts, pardner",
+                $"Is that {GetNameFromId(userId)}? Nah, can't be. This dude knows he's banned yet still comin' around.",
+                "Shame",
+                "Sorry, I don't associate with BANNED USERS",
+                "Ew, a disgusting banned user.",
+                "Eek! A banned user!",
+                $"Oh god, it's {GetNameFromId(userId)} again...",
+                "How many times I gotta tell this guy..."
+            };
+            return possibleResponse[_random.Next(possibleResponse.Length)];
+        }
+
+        private static string GetDeniedMessageForBanningUnbannable(string userId)
+        {
+            string[] possibleResponse = new string[] {
+                "lol",
+                "Yeah sure, 'Done.'",
+                "*awink*"
+            };
+            return possibleResponse[_random.Next(possibleResponse.Length)];
         }
 
         private static void LoadUserPermissions()
@@ -256,13 +317,13 @@ namespace SpecterAI.services
                         string[] lineSplit = line.Split(':');
                         string id = lineSplit[0];
                         string[] entitlements = lineSplit[1].Split(',');
-                        permissions.Add(id, new HashSet<Entitlement>());
+                        _permissions.Add(id, new HashSet<Entitlement>());
                         foreach (string entitlement in entitlements)
                         {
                             Entitlement result;
                             if (Enum.TryParse(entitlement, out result))
                             {
-                                permissions[id].Add(result);
+                                _permissions[id].Add(result);
                             }
                         }
                     }
@@ -284,7 +345,7 @@ namespace SpecterAI.services
                     string[] lines = File.ReadAllLines(bannerUsersFile);
                     foreach (string id in lines)
                     {
-                        bannedUsers.Add(id);
+                        _bannedUsers.Add(id);
                     }
                 }
             }
@@ -305,7 +366,7 @@ namespace SpecterAI.services
                     foreach (string line in lines)
                     {
                         UserMetadata metadata = new UserMetadata(line);
-                        userMetadata.Add(metadata.Id, metadata);
+                        _userMetadata.Add(metadata.Id, metadata);
                     }
                 }
             } catch (Exception ex)
@@ -332,9 +393,9 @@ namespace SpecterAI.services
                 }
 
                 List<string> lines = new List<string>();
-                foreach (string key in permissions.Keys)
+                foreach (string key in _permissions.Keys)
                 {
-                    lines.Add(key + ":" + string.Join(",", permissions[key]));
+                    lines.Add(key + ":" + string.Join(",", _permissions[key]));
                 }
                 File.WriteAllLines(permissionsFile, lines.ToArray());
             }
@@ -355,7 +416,7 @@ namespace SpecterAI.services
                 }
 
                 List<string> lines = new List<string>();
-                foreach (string bannedId in bannedUsers)
+                foreach (string bannedId in _bannedUsers)
                 {
                     lines.Add(bannedId);
                 }
@@ -378,9 +439,9 @@ namespace SpecterAI.services
                 }
 
                 List<string> lines = new List<string>();
-                foreach (string key in userMetadata.Keys)
+                foreach (string key in _userMetadata.Keys)
                 {
-                    lines.Add(userMetadata[key].ToString());
+                    lines.Add(_userMetadata[key].ToString());
                 }
                 File.WriteAllLines(metadataFile, lines.ToArray());
             }
