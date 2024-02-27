@@ -24,6 +24,12 @@ namespace SpecterAI.commands
             await RespondAsync(response);
         }
 
+        [SlashCommand("permissions-view", "Returns a users granted permissions")]
+        public async Task ViewPermissions(string user_id)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.ViewPermissions);
+            await RespondAsync("User (" + user_id + ") has the following entitlements: " + string.Join(", ", PermissionsService.GetUserEntitlements(user_id)));
+        }
 
         [SlashCommand("permissions-grant", "Grants a user or server a permission")]
         public async Task GrantPermission(string id, string permission)
@@ -41,5 +47,8 @@ namespace SpecterAI.commands
                 await RespondAsync(permission + " is not a valid permission");
             }
         }
+
+
+
     }
 }
