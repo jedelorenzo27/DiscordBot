@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpecterAI.services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,10 @@ namespace SpecterAI.Utilities
         {
             Uri uriResult;
             if (!Uri.TryCreate(uri, UriKind.Absolute, out uriResult))
+            {
+                await LoggingService.LogMessage(LogLevel.Error, $"[DownloadFileAsync] URI is invalid. Given URI: {uri}");
                 throw new InvalidOperationException("URI is invalid.");
+            }
 
             if (File.Exists(outputPath))
                 File.Delete(outputPath);

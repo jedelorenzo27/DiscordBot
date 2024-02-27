@@ -20,13 +20,10 @@ namespace SpecterAI.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.OpenAiChat);
 
-
-            Console.WriteLine("USER: " + prompt);
             Stopwatch stopwatch = new Stopwatch();
             await DeferAsync();
             conversation.addMessage(MessageRole.USER, prompt);
             string response = await OpenAIServices.Chat(Program._httpClient, conversation);
-            Console.WriteLine("OpenAI: " + response);
             conversation.addMessage(MessageRole.SYSTEM, response);
             Action<MessageProperties> action = (x) => { x.Content = response; };
             await ModifyOriginalResponseAsync(action);
@@ -37,7 +34,6 @@ namespace SpecterAI.commands
         public async Task ClearChatConversation()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.OpenAiChat);
-
             conversation = new Conversation();
             await RespondAsync("Conversation cleared");
         }
@@ -47,7 +43,6 @@ namespace SpecterAI.commands
         public async Task OpenAiImage(string prompt)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.OpenAiImage);
-
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();

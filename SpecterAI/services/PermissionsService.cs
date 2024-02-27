@@ -64,13 +64,6 @@ namespace SpecterAI.services
                 requests.Add(entitlement, 0);
             }
             requests[entitlement]++;
-
-
-            Console.WriteLine("Writing counts");
-            foreach(Entitlement key in requests.Keys)
-            {
-                Console.WriteLine(key + "=" + requests[key]);
-            }
         }
 
         override
@@ -81,7 +74,6 @@ namespace SpecterAI.services
             {
                 entitlementCounts.Add(EnumExtensions.ToDescriptionString(key) + enitlementDelimiter + requests[key]);
             }
-            Console.WriteLine(Name + delimiter + Id + delimiter + string.Join(subDelimiter, entitlementCounts));
             return Name + delimiter + Id + delimiter + string.Join(subDelimiter, entitlementCounts);
         }
 
@@ -105,7 +97,6 @@ namespace SpecterAI.services
         OpenAiChat,
         [Description("OpenAiImage")]
         OpenAiImage,
-        
     }
 
     public static class PermissionsService
@@ -148,32 +139,42 @@ namespace SpecterAI.services
             LoadMetadata();
         }
 
-        public static void AddPermission(SocketInteractionContext context, string idToGiveEntitlement, Entitlement entitlement)
+        public static async Task GrantPermission(SocketInteractionContext context, string idToGiveEntitlement, Entitlement entitlement)
         {
             if (!permissions.ContainsKey(idToGiveEntitlement))
             {
+                await LoggingService.LogMessage(LogLevel.Info, $"Granting permission (${EnumExtensions.ToDescriptionString(entitlement)}) to user:{idToGiveEntitlement}");
                 permissions.Add(idToGiveEntitlement, new HashSet<Entitlement>());
+            } else
+            {
+                await LoggingService.LogMessage(LogLevel.Info, $"user:{idToGiveEntitlement} already has ${EnumExtensions.ToDescriptionString(entitlement)}");
             }
             permissions[idToGiveEntitlement].Add(entitlement);
             SaveUserPermissions();
         }
 
-        public static void RemovePermission(SocketInteractionContext context, string idToRemoveEntitlement, Entitlement entitlement)
+        public static async Task RemovePermission(SocketInteractionContext context, string idToRemoveEntitlement, Entitlement entitlement)
         {
             if (permissions.ContainsKey(idToRemoveEntitlement))
             {
+                await LoggingService.LogMessage(LogLevel.Info, $"Removing permission (${EnumExtensions.ToDescriptionString(entitlement)}) from user:{idToRemoveEntitlement}");
                 permissions[idToRemoveEntitlement].Remove(entitlement);
+            } else
+            {
+                await LoggingService.LogMessage(LogLevel.Info, $"Could not remove permission as (user:{idToRemoveEntitlement}) does not have ${EnumExtensions.ToDescriptionString(entitlement)}");
             }
             SaveUserPermissions();
             throw new UnauthorizedException();
         }
 
-        public static void Ban(SocketInteractionContext context, string idToBan)
+        public static async Task Ban(SocketInteractionContext context, string idToBan)
         {
             if (unbannable.Contains(idToBan))
             {
+                await LoggingService.LogMessage(LogLevel.Info, $"A user ({context.User.Username}:{context.User.Id}) tried to ban and unbannable ({idToBan}) user");
                 return;
             }
+            await LoggingService.LogMessage(LogLevel.Info, $"Banning user: {idToBan}");
             bannedUsers.Add(idToBan);
             SaveBannedUsers();
         }
@@ -202,7 +203,6 @@ namespace SpecterAI.services
             recordPermissionCheck(context.User.Id.ToString(), context.User.Username, entitlement);
             recordPermissionCheck(context.Guild.Id.ToString(), context.Guild.Name, entitlement);
 
-            Console.WriteLine("Checking permissions to grant");
             if (bannedUsers.Contains(context.User.Id.ToString())) {
                 throw new BannedException();
             }
@@ -220,8 +220,6 @@ namespace SpecterAI.services
             {
                 return true;
             }
-
-            Console.WriteLine("Invalid permissions for user:" + context.User.Id);
             await context.Interaction.RespondAsync("User " + context.User.Id + " is unauthorized to use " + EnumExtensions.ToDescriptionString(entitlement));
             throw new UnauthorizedException();
         }

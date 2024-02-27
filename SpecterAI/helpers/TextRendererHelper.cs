@@ -2,6 +2,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
+using SpecterAI.services;
 
 namespace SpecterAI.helpers
 {
@@ -35,11 +36,11 @@ namespace SpecterAI.helpers
             return maxLineHeight;
         }
 
-        public void renderText(Image image, Brush brush, Font font, RectangleF boundingBox, string text, HorizontalAlignment hAlign = HorizontalAlignment.Center, VerticalAlignment vAlign = VerticalAlignment.Top)
+        public async Task renderText(Image image, Brush brush, Font font, RectangleF boundingBox, string text, HorizontalAlignment hAlign = HorizontalAlignment.Center, VerticalAlignment vAlign = VerticalAlignment.Top)
         {
             if (text == null)
             {
-                Console.WriteLine("Text was null for some reason");
+                await LoggingService.LogMessage(LogLevel.Error, $"[renderText] Text was null for some reason");
                 return;
             }
 

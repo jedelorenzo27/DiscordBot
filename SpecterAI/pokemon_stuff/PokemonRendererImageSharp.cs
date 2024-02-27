@@ -114,18 +114,18 @@ namespace SpecterAI.pokemonStuff
             gif.SaveAsWebp(GeneralUtilities.outputDirectory + @"pokemon_cards\" + pokemonDefinition.name + ".webp");
         }
 
-        private void renderPokemonCard(Image image, PokemonDefinition definition)
+        private async Task renderPokemonCard(Image image, PokemonDefinition definition)
         {
             renderPortrait(image, definition);
-            renderName(image, definition);
-            renderHealth(image, definition);
-            renderDetails(image, definition);
-            renderAttacks(image, definition);
-            renderFlavorText(image, definition);
-            renderResistances(image, definition);
-            renderWeaknesses(image, definition);
+            await renderName(image, definition);
+            await renderHealth(image, definition);
+            await renderDetails(image, definition);
+            await renderAttacks(image, definition);
+            await renderFlavorText(image, definition);
+            await renderResistances(image, definition);
+            await renderWeaknesses(image, definition);
             renderRetreatCost(image, definition);
-            renderIllustrator(image, definition);
+            await renderIllustrator(image, definition);
             renderRarity(image, definition);
         }
 
@@ -180,21 +180,21 @@ namespace SpecterAI.pokemonStuff
             return iconPath;
         }
 
-        private void renderName(Image image, PokemonDefinition definition)
+        private async Task renderName(Image image, PokemonDefinition definition)
         {
             RectangleF boundingBox = getBoundingBox(image, 10, 7, 65, 10.5f);
-            textHelper.renderText(image, Brushes.Solid(Color.Black), defaultBold, boundingBox, definition.name.ToUpper(), HorizontalAlignment.Left, VerticalAlignment.Bottom);
+            await textHelper.renderText(image, Brushes.Solid(Color.Black), defaultBold, boundingBox, definition.name.ToUpper(), HorizontalAlignment.Left, VerticalAlignment.Bottom);
         }
 
-        private void renderHealth(Image image, PokemonDefinition definition)
+        private async Task renderHealth(Image image, PokemonDefinition definition)
         {
             RectangleF boundingBox = getBoundingBox(image, 66, 7, 83, 10.5f);
             Font font = new Font(defaultBold, 100);
-            textHelper.renderText(image, Brushes.Solid(Color.Red), font, boundingBox, definition.health + " HP", HorizontalAlignment.Right, VerticalAlignment.Bottom);
+            await textHelper.renderText(image, Brushes.Solid(Color.Red), font, boundingBox, definition.health + " HP", HorizontalAlignment.Right, VerticalAlignment.Bottom);
 
         }
 
-        private void renderDetails(Image image, PokemonDefinition definition)
+        private async Task renderDetails(Image image, PokemonDefinition definition)
         {
             // TODO: font should be italics
             RectangleF boundingBox = getBoundingBox(image, 13.75f, 53.75f, 85.5f, 56.5f);
@@ -226,7 +226,7 @@ namespace SpecterAI.pokemonStuff
             }
             description = description.Trim();
 
-            textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, description, HorizontalAlignment.Center, VerticalAlignment.Center);
+            await textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, description, HorizontalAlignment.Center, VerticalAlignment.Center);
         }
 
         private void renderPortrait(Image image, PokemonDefinition definition)
@@ -239,31 +239,31 @@ namespace SpecterAI.pokemonStuff
             }
         }
 
-        private void renderAttacks(Image image, PokemonDefinition definition)
+        private async Task renderAttacks(Image image, PokemonDefinition definition)
         {
             RectangleF totalAttackSpace = getBoundingBox(image,5.5f, 57, 94f, 81.75f);
             if (definition.moveset.Count == 1)
             {
-                renderAttack(image, totalAttackSpace, definition.moveset[0], 1);
+                await renderAttack(image, totalAttackSpace, definition.moveset[0], 1);
             } else if (definition.moveset.Count == 2)
             {
                 RectangleF attackMove1 = getBoundingBox(image, totalAttackSpace, 0, 0, 100, 50);
-                renderAttack(image, attackMove1, definition.moveset[0], 2);
+                await renderAttack(image, attackMove1, definition.moveset[0], 2);
                 RectangleF attackMove2 = getBoundingBox(image, totalAttackSpace, 0, 50, 100, 100);
-                renderAttack(image, attackMove2, definition.moveset[1], 2);
+                await renderAttack(image, attackMove2, definition.moveset[1], 2);
             }
             else if (definition.moveset.Count > 2)
             {
                 RectangleF attackMove1 = getBoundingBox(image, totalAttackSpace, 0, 0, 100, 33);
-                renderAttack(image, attackMove1, definition.moveset[0], 3);
+                await renderAttack(image, attackMove1, definition.moveset[0], 3);
                 RectangleF attackMove2 = getBoundingBox(image, totalAttackSpace, 0, 33, 100, 66);
-                renderAttack(image, attackMove2, definition.moveset[1], 3);
+                await renderAttack(image, attackMove2, definition.moveset[1], 3);
                 RectangleF attackMove3 = getBoundingBox(image, totalAttackSpace, 0, 66, 100, 100);
-                renderAttack(image, attackMove3, definition.moveset[2], 3);
+                await renderAttack(image, attackMove3, definition.moveset[2], 3);
             }
         }
 
-        private void renderAttack(Image image, RectangleF boundingBox, PokemonAttack attack, int totalNumberOfAttacks)
+        private async Task renderAttack(Image image, RectangleF boundingBox, PokemonAttack attack, int totalNumberOfAttacks)
         {
 
             RectangleF attackIcons;
@@ -321,15 +321,15 @@ namespace SpecterAI.pokemonStuff
 
             RectangleF name = getBoundingBox(image, boundingBox, 15, 0, 85, 30);
             Font font = new Font(defaultBold, 24);
-            textHelper.renderText(image, Brushes.Solid(Color.Black), font, name, attack.name, HorizontalAlignment.Left, VerticalAlignment.Bottom);
+            await textHelper.renderText(image, Brushes.Solid(Color.Black), font, name, attack.name, HorizontalAlignment.Left, VerticalAlignment.Bottom);
 
             RectangleF description = getBoundingBox(image, boundingBox, 15, 30, 85, 100);
-            font = new Font(defaultRegular, 20); 
-            textHelper.renderText(image, Brushes.Solid(Color.Black), font, description, attack.description, HorizontalAlignment.Left, VerticalAlignment.Top);
+            font = new Font(defaultRegular, 20);
+            await textHelper.renderText(image, Brushes.Solid(Color.Black), font, description, attack.description, HorizontalAlignment.Left, VerticalAlignment.Top);
 
             RectangleF damage = getBoundingBox(image, boundingBox, 85, 0, 100, 100);
             font = new Font(defaultBold, 40);
-            textHelper.renderText(image, Brushes.Solid(Color.Black), font, damage, attack.damage + "", HorizontalAlignment.Right, VerticalAlignment.Center);
+            await textHelper.renderText(image, Brushes.Solid(Color.Black), font, damage, attack.damage + "", HorizontalAlignment.Right, VerticalAlignment.Center);
         }
         private void renderIcon(Image image, RectangleF boundingBox, PokemonType iconType)
         {
@@ -346,14 +346,14 @@ namespace SpecterAI.pokemonStuff
         }
 
 
-        private void renderFlavorText(Image image, PokemonDefinition definition)
+        private async Task renderFlavorText(Image image, PokemonDefinition definition)
         {
             RectangleF boundingBox = getBoundingBox(image, 9, 89, 89.5f, 94);
             Font font = new Font(defaultItalics, 16);
-            textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, definition.flavorText, HorizontalAlignment.Center, VerticalAlignment.Center);
+            await textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, definition.flavorText, HorizontalAlignment.Center, VerticalAlignment.Center);
         }
 
-        private void renderResistances(Image image, PokemonDefinition definition)
+        private async Task renderResistances(Image image, PokemonDefinition definition)
         {
             // render icon
             RectangleF boundingBox = getBoundingBox(image, 46, 84.5f, 52, 88.5f);
@@ -373,11 +373,11 @@ namespace SpecterAI.pokemonStuff
             {
                 boundingBox = getBoundingBox(image, 52.25f, 84.5f, 64, 88.5f);
                 Font font = new Font(defaultBold, 24);
-                textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, definition.resistanceStrength + "", HorizontalAlignment.Left, VerticalAlignment.Center);
+                await textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, definition.resistanceStrength + "", HorizontalAlignment.Left, VerticalAlignment.Center);
             }
         }
 
-        private void renderWeaknesses(Image image, PokemonDefinition definition)
+        private async Task renderWeaknesses(Image image, PokemonDefinition definition)
         {
             // Render Icon
             RectangleF boundingBox = getBoundingBox(image, 12.5f, 84.5f, 18.5f, 88.5f);
@@ -397,7 +397,7 @@ namespace SpecterAI.pokemonStuff
             {
                 boundingBox = getBoundingBox(image, 18.75f, 84.5f, 30f, 88.5f);
                 Font font = new Font(defaultBold, 24);
-                textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, definition.weaknessStrength + "", HorizontalAlignment.Left, VerticalAlignment.Center);
+                await textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, definition.weaknessStrength + "", HorizontalAlignment.Left, VerticalAlignment.Center);
             }
         }
 
@@ -415,13 +415,13 @@ namespace SpecterAI.pokemonStuff
             }
         }
 
-        private void renderIllustrator(Image image, PokemonDefinition definition)
+        private async Task renderIllustrator(Image image, PokemonDefinition definition)
         {
             if (definition.illustrator != null)
             {
                 RectangleF boundingBox = getBoundingBox(image, 5.5f, 94.5f, 27, 96.25f);
                 Font font = new Font(defaultBold, 100);
-                textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, "Illus. " + definition.illustrator.Trim(), HorizontalAlignment.Left, VerticalAlignment.Center);
+                await textHelper.renderText(image, Brushes.Solid(Color.Black), font, boundingBox, "Illus. " + definition.illustrator.Trim(), HorizontalAlignment.Left, VerticalAlignment.Center);
             }
         }
 

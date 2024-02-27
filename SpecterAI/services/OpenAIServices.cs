@@ -127,7 +127,6 @@ namespace SpecterAI.services
 
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/images/generations"))
             {
-                Console.WriteLine("Get image from OpenAI");
                 var requestData = new
                 {
                     model = "dall-e-3",
@@ -142,14 +141,11 @@ namespace SpecterAI.services
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAiApiToken);
                 requestMessage.Content = contentString;
                 HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
-                Console.WriteLine(responseMessage);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
                 try
                 {
                     dynamic something = JsonConvert.DeserializeObject<dynamic>(stringContent);
                     string imageURL = something.data[0].url;
-                    Console.WriteLine(stringContent);
-
                     var res = await client.GetAsync(imageURL);
 
                     byte[] bytes = await res.Content.ReadAsByteArrayAsync();
@@ -160,7 +156,6 @@ namespace SpecterAI.services
                 catch (Exception ex)
                 {
                     return "Something broke: " + ex.Message;
-                    //return "Something went wrong, likely while pulling data from chatGPTs response.\nstringContent: " + stringContent + "\nException: " + ex.Message;
                 }
             }
         }

@@ -86,9 +86,11 @@ public class Program
         // When the bot is ready, it triggers the Client_Ready method, which can include tasks like registering commands with Discord.
         _client.Ready += Client_Ready;
 
+        // Prepare logging service. Any logs sent before here will be printed to console but not sent to discord.
+        LoggingService.LoadLoggingServers(_client);
+
         // Block this task until the program is closed.
         //await Task.Delay(-1);
-        
         Console.ReadKey();
         await _client.LogoutAsync();
     }
