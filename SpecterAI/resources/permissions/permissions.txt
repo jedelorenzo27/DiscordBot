@@ -1,1 +1,1 @@
-222127402980081667:All,ViewPermissions,Pokemon,OpenAiImage
+222127402980081667:All

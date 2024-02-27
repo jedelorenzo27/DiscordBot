@@ -23,23 +23,42 @@ namespace SpecterAI.commands
             await RespondAsync(response);
         }
 
-        [SlashCommand("permissions-view", "Returns a users granted permissions")]
+        [SlashCommand("permissions-view", "Returns a user's granted permissions")]
         public async Task ViewPermissions(string user_id)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.ViewPermissions);
-            await RespondAsync("User (" + user_id + ") has the following permissions: " + string.Join(", ", PermissionsService.GetUserEntitlements(user_id)));
+            await RespondAsync($"User ({PermissionsService.GetNameFromId(user_id)}) has the following permissions: " + string.Join(", ", PermissionsService.GetUserEntitlements(user_id)));
+        }
+
+        [SlashCommand("permissions-view-usage", "Returns usage stats for a given user.")]
+        public async Task ViewUsage(string user_id)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.ViewUsage);
+            Dictionary<Entitlement, int>? usage = PermissionsService.GetEntitlementUsage(Context, user_id);
+            string response = "";
+            if (usage != null)
+            {
+                response = $"Usage for {PermissionsService.GetNameFromId(user_id)}";
+                foreach (Entitlement entitlement in usage.Keys)
+                {
+                    response += $"\n{EnumExtensions.ToDescriptionString(entitlement)} : {usage[entitlement]}";
+                }
+            } else
+            {
+                response = $"No usage found for {PermissionsService.GetNameFromId(user_id)}";
+            }
+            await RespondAsync(response);
         }
 
         [SlashCommand("permissions-grant", "Grants a user or server a permission")]
         public async Task GrantPermission(string id, string permission)
         {
-            Console.WriteLine(Context.User.Id + " is trying to grant permissions");
             await PermissionsService.ValidatePermissions(Context, Entitlement.GrantPermission);
             
             Entitlement result;
             if (Enum.TryParse<Entitlement>(permission, out result))
             {
-                PermissionsService.GrantPermission(Context, id, result);
+                await PermissionsService.GrantPermission(Context, id, result);
                 await RespondAsync("Done");
             } else
             {
@@ -47,7 +66,32 @@ namespace SpecterAI.commands
             }
         }
 
+        [SlashCommand("permissions-revoke", "Revokes a users permissions")]
+        public async Task RevokePermission(string id, string permission)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.RemovePermission);
 
+            Entitlement result;
+            if (Enum.TryParse<Entitlement>(permission, out result))
+            {
+                await PermissionsService.RemovePermission(Context, id, result);
+                await RespondAsync("Done");
+            }
+            else
+            {
+                await RespondAsync(permission + " is not a valid permission");
+            }
+        }
+
+        [SlashCommand("permissions-ban", "Bans a user")]
+        public async Task Ban(string id)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.BanOther);
+            await PermissionsService.Ban(Context, id);
+            await RespondAsync("Done");
+        }
+
+        
 
     }
 }

@@ -89,6 +89,8 @@ namespace SpecterAI.services
         RemovePermission,
         [Description("ViewPermissions")]
         ViewPermissions,
+        [Description("ViewUsage")]
+        ViewUsage,
         [Description("BanOther")]
         BanOther,
         [Description("Pokemon")]
@@ -139,15 +141,24 @@ namespace SpecterAI.services
             LoadMetadata();
         }
 
+        public static string GetNameFromId(string user_id)
+        {
+            if (userMetadata.ContainsKey(user_id))
+            {
+                return userMetadata[user_id].Name;
+            }
+            return user_id;
+        }
+
         public static async Task GrantPermission(SocketInteractionContext context, string idToGiveEntitlement, Entitlement entitlement)
         {
             if (!permissions.ContainsKey(idToGiveEntitlement))
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"Granting permission (${EnumExtensions.ToDescriptionString(entitlement)}) to user:{idToGiveEntitlement}");
+                await LoggingService.LogMessage(LogLevel.Info, $"Granting permission ({EnumExtensions.ToDescriptionString(entitlement)}) to user:{GetNameFromId(idToGiveEntitlement)}");
                 permissions.Add(idToGiveEntitlement, new HashSet<Entitlement>());
             } else
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"user:{idToGiveEntitlement} already has ${EnumExtensions.ToDescriptionString(entitlement)}");
+                await LoggingService.LogMessage(LogLevel.Info, $"user:{GetNameFromId(idToGiveEntitlement)} already has ${EnumExtensions.ToDescriptionString(entitlement)}");
             }
             permissions[idToGiveEntitlement].Add(entitlement);
             SaveUserPermissions();
@@ -157,11 +168,11 @@ namespace SpecterAI.services
         {
             if (permissions.ContainsKey(idToRemoveEntitlement))
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"Removing permission (${EnumExtensions.ToDescriptionString(entitlement)}) from user:{idToRemoveEntitlement}");
+                await LoggingService.LogMessage(LogLevel.Info, $"Removing permission (${EnumExtensions.ToDescriptionString(entitlement)}) from user:{GetNameFromId(idToRemoveEntitlement)}");
                 permissions[idToRemoveEntitlement].Remove(entitlement);
             } else
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"Could not remove permission as (user:{idToRemoveEntitlement}) does not have ${EnumExtensions.ToDescriptionString(entitlement)}");
+                await LoggingService.LogMessage(LogLevel.Info, $"Could not remove permission as (user:{GetNameFromId(idToRemoveEntitlement)}) does not have ${EnumExtensions.ToDescriptionString(entitlement)}");
             }
             SaveUserPermissions();
             throw new UnauthorizedException();
@@ -171,10 +182,10 @@ namespace SpecterAI.services
         {
             if (unbannable.Contains(idToBan))
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"A user ({context.User.Username}:{context.User.Id}) tried to ban and unbannable ({idToBan}) user");
+                await LoggingService.LogMessage(LogLevel.Info, $"A user ({GetNameFromId(context.User.Id.ToString())}:{context.User.Id}) tried to ban and unbannable ({GetNameFromId(idToBan)}) user");
                 return;
             }
-            await LoggingService.LogMessage(LogLevel.Info, $"Banning user: {idToBan}");
+            await LoggingService.LogMessage(LogLevel.Info, $"Banning user: {GetNameFromId(idToBan)}");
             bannedUsers.Add(idToBan);
             SaveBannedUsers();
         }
@@ -188,6 +199,15 @@ namespace SpecterAI.services
             return new Entitlement[0];
         }
 
+        public static Dictionary<Entitlement, int>? GetEntitlementUsage(SocketInteractionContext context, string id)
+        {
+            if (userMetadata.ContainsKey(id))
+            {
+                return userMetadata[id].requests;
+            }
+            return null;
+        }
+
         private static void recordPermissionCheck(string id, string name, Entitlement entitlement)
         {
             if (!userMetadata.ContainsKey(id)) 
@@ -197,7 +217,7 @@ namespace SpecterAI.services
             userMetadata[id].IncrementEntitlementCount(entitlement);
             SaveMetadata();
         }
-        
+
         public static async Task<bool> ValidatePermissions(SocketInteractionContext context, Entitlement entitlement)
         {
             recordPermissionCheck(context.User.Id.ToString(), context.User.Username, entitlement);
@@ -207,20 +227,20 @@ namespace SpecterAI.services
                 throw new BannedException();
             }
 
-            if (permissions.ContainsKey(context.Guild.Id.ToString()) 
-                && (permissions[context.Guild.Id.ToString()].Contains(entitlement) 
+            if (permissions.ContainsKey(context.Guild.Id.ToString())
+                && (permissions[context.Guild.Id.ToString()].Contains(entitlement)
                 || permissions[context.Guild.Id.ToString()].Contains(Entitlement.All)))
             {
                 return true;
             }
 
-            if (permissions.ContainsKey(context.User.Id.ToString()) 
-                && (permissions[context.User.Id.ToString()].Contains(entitlement) 
+            if (permissions.ContainsKey(context.User.Id.ToString())
+                && (permissions[context.User.Id.ToString()].Contains(entitlement)
                 || permissions[context.User.Id.ToString()].Contains(Entitlement.All)))
             {
                 return true;
             }
-            await context.Interaction.RespondAsync("User " + context.User.Id + " is unauthorized to use " + EnumExtensions.ToDescriptionString(entitlement));
+            await context.Interaction.RespondAsync($"User {GetNameFromId(context.User.Id.ToString())} is unauthorized to use " + EnumExtensions.ToDescriptionString(entitlement));
             throw new UnauthorizedException();
         }
 

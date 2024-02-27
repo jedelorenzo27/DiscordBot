@@ -85,16 +85,10 @@ namespace SpecterAI.services
 
     public static class OpenAIServices
     {
-        //https://github.com/OkGoDoIt/OpenAI-API-dotnet
-        //private static OpenAIAPI? api;
-        //private static Conversation conversation;
-
         public async static Task<string> Chat(HttpClient client, Conversation conversation)
         {
-
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions"))
             {
-
                 var requestData = new
                 {
                     messages = conversation.conversationArray,
