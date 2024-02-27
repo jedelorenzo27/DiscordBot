@@ -22,6 +22,7 @@ public class Program
     {
         _httpClient = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate });
         SecretsHandler.LoadSecrets();
+        PermissionsService.LoadPermissions();
 
         //PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
         //renderer.createTestAnimatedPokemonCard_gif();

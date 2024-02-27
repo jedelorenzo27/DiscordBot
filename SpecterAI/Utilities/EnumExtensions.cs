@@ -13,8 +13,16 @@ namespace SpecterAI.Utilities
         public static string ToDescriptionString(this MessageRole val)
         {
             DescriptionAttribute[] attributes = (DescriptionAttribute[])val
-               .GetType()
-               .GetField(val.ToString())
+               .GetType().GetField(val.ToString())
+               .GetCustomAttributes(typeof(DescriptionAttribute), false);
+            return attributes.Length > 0 ? attributes[0].Description : string.Empty;
+        }
+
+
+        public static string ToDescriptionString(this Entitlement val)
+        {
+            DescriptionAttribute[] attributes = (DescriptionAttribute[])val
+               .GetType().GetField(val.ToString())
                .GetCustomAttributes(typeof(DescriptionAttribute), false);
             return attributes.Length > 0 ? attributes[0].Description : string.Empty;
         }
