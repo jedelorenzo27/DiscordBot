@@ -19,6 +19,8 @@ namespace SpecterAI.commands
         [SlashCommand("pokemon2", "Does nothing")]
         public async Task PokemonHello(string name)
         {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.Pokemon);
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 

@@ -18,6 +18,9 @@ namespace SpecterAI.commands
         [SlashCommand("chat", "Chat with Open AI")]
         public async Task OpenAiChat(string prompt)
         {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.OpenAiChat);
+
+
             Console.WriteLine("USER: " + prompt);
             Stopwatch stopwatch = new Stopwatch();
             await DeferAsync();
@@ -33,6 +36,8 @@ namespace SpecterAI.commands
         [SlashCommand("clear-chat", "Clears open AI's chat conversation")]
         public async Task ClearChatConversation()
         {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.OpenAiChat);
+
             conversation = new Conversation();
             await RespondAsync("Conversation cleared");
         }
@@ -41,6 +46,9 @@ namespace SpecterAI.commands
         [SlashCommand("image", "Render an image using Open Ai's chatGPT")]
         public async Task OpenAiImage(string prompt)
         {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.OpenAiImage);
+
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             await DeferAsync();
