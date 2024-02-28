@@ -1,1 +1,1 @@
-222127402980081667:GrantPermission,All
+222127402980081667:GrantPermission

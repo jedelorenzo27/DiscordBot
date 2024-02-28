@@ -232,6 +232,7 @@ namespace SpecterAI.services
             recordPermissionCheck(context.Guild.Id.ToString(), context.Guild.Name, entitlement);
 
             if (_bannedUsers.Contains(context.User.Id.ToString())) {
+                await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}' due to being banned.");
                 await context.Interaction.RespondAsync(GetDeniedMessageForBannedUser(context.User.Id.ToString()));
                 throw new BannedException();
             }
@@ -249,6 +250,7 @@ namespace SpecterAI.services
             {
                 return true;
             }
+            await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}'");
             await context.Interaction.RespondAsync(GetDeniedMessageForUnauthrorizedUser(context.User.Id.ToString()));
             throw new UnauthorizedException();
         }
