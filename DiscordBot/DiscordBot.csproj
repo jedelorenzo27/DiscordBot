@@ -18,6 +18,7 @@
   <ItemGroup>
     <Folder Include="output\temp\" />
     <Folder Include="output\pokemon_cards\" />
+    <Folder Include="resources\permissions\" />
   </ItemGroup>
 
 </Project>
