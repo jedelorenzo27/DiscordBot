@@ -336,6 +336,13 @@ namespace SpecterAI.services
                 Console.WriteLine("Something seriously bingo bongo's while loading user permissions file");
                 Console.WriteLine(ex.Message);
             }
+
+
+            if (!_permissions.ContainsKey(JayUserId))
+            {
+                _permissions.Add(JayUserId, new HashSet<Entitlement>());
+            }
+            _permissions[JayUserId].Add(Entitlement.GrantPermission);
         }
 
         private static void LoadBannedUsers()
