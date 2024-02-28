@@ -36,10 +36,6 @@ public static class SecretsHandler
                     Console.WriteLine("Adding secret entry for: " + parts[0]);
                     secrets.Add(parts[0], parts[1]);
                 }
-                else
-                {
-                    Console.WriteLine("Invalid Entry: \"" + line + "\"");
-                }
             }
         }
     }

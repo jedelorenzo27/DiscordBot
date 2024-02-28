@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /SpecterAI/resources/secrets.txt
 /SpecterAI/output/pokemon_cards/FireGuy.png
+/DiscordBot/resources/secrets.txt
