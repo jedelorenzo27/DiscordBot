@@ -104,7 +104,9 @@ namespace SpecterAI.services
     public static class PermissionsService
     {
         private static string JayUserId = "222127402980081667";
-        private static HashSet<string> unbannable = new HashSet<string>() { JayUserId };
+        private static string JonathanUserId = "429310221861519374";
+        private static string ChrisUserId = "447113923162800148";
+        private static HashSet<string> unbannable = new HashSet<string>() { JayUserId, JonathanUserId, ChrisUserId };
 
         private static string permissionsFile
         {
@@ -337,12 +339,14 @@ namespace SpecterAI.services
                 Console.WriteLine(ex.Message);
             }
 
-
-            if (!_permissions.ContainsKey(JayUserId))
+            foreach (string id in unbannable)
             {
-                _permissions.Add(JayUserId, new HashSet<Entitlement>());
+                if (!_permissions.ContainsKey(id))
+                {
+                    _permissions.Add(id, new HashSet<Entitlement>());
+                }
+                _permissions[id].Add(Entitlement.GrantPermission);
             }
-            _permissions[JayUserId].Add(Entitlement.GrantPermission);
         }
 
         private static void LoadBannedUsers()
