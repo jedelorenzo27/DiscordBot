@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /DiscordBot/resources/permissions/permissions.txt
 /DiscordBot/resources/permissions/user_metadata.txt
 /DiscordBot/resources/permissions/banned_users.txt
+/DiscordBot/output*
