@@ -11,7 +11,7 @@ namespace SpecterAI.commands
 {
     public class PermissionCommands : InteractionModuleBase<SocketInteractionContext>
     {
-        [SlashCommand("permissions-list", "Grants a user or server a permission")]
+        [SlashCommand("permissions-list", "View available permissions")]
         public async Task ListPermissions()
         {
             string response = "Available Permissions: ";

@@ -106,7 +106,8 @@ namespace SpecterAI.services
         private static string JayUserId = "222127402980081667";
         private static string JonathanUserId = "429310221861519374";
         private static string ChrisUserId = "447113923162800148";
-        private static HashSet<string> unbannable = new HashSet<string>() { JayUserId, JonathanUserId, ChrisUserId };
+        private static string globalId = "global_access";
+        private static HashSet<string> unbannable = new HashSet<string>() { globalId, JayUserId, JonathanUserId, ChrisUserId };
 
         private static string permissionsFile
         {
@@ -237,6 +238,10 @@ namespace SpecterAI.services
                 await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}' due to being banned.");
                 await context.Interaction.RespondAsync(GetDeniedMessageForBannedUser(context.User.Id.ToString()));
                 throw new BannedException();
+            }
+
+            if (_permissions.ContainsKey(globalId) && _permissions[globalId].Contains(entitlement)) {
+                return true;
             }
 
             if (_permissions.ContainsKey(context.Guild.Id.ToString())
