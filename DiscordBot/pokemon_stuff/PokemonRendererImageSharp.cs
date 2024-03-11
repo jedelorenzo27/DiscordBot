@@ -29,25 +29,32 @@ namespace SpecterAI.pokemonStuff
         {
             textHelper = new TextRendererHelper();
             fontCollection = new FontCollection ();
-            FontFamily family = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts" + Path.DirectorySeparatorChar + "Gill-Sans-Condensed-Bold.otf");
-            FontFamily sansItalics = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts" + Path.DirectorySeparatorChar + "Sans-Condensed-BOLDITALIC.ttf");
-            FontFamily sansRegular = fontCollection.Add(GeneralUtilities.resourceDirector + @"fonts" + Path.DirectorySeparatorChar + "Sans-Condensed-Regular.ttf");
+            FontFamily family = fontCollection.Add(GeneralUtilities.resourceDirectory + @"fonts" + Path.DirectorySeparatorChar + "Gill-Sans-Condensed-Bold.otf");
+            FontFamily sansItalics = fontCollection.Add(GeneralUtilities.resourceDirectory + @"fonts" + Path.DirectorySeparatorChar + "Sans-Condensed-BOLDITALIC.ttf");
+            FontFamily sansRegular = fontCollection.Add(GeneralUtilities.resourceDirectory + @"fonts" + Path.DirectorySeparatorChar + "Sans-Condensed-Regular.ttf");
 
             defaultBold = family.CreateFont(1000, FontStyle.Regular);
             defaultRegular = sansRegular.CreateFont(1000, FontStyle.Regular);
             defaultItalics = sansItalics.CreateFont(1000, FontStyle.BoldItalic);
         }
 
-        public void createTestPokemonCard(PokemonDefinition pokemonDefinition)
+        public async Task createTestPokemonCard(PokemonDefinition pokemonDefinition)
         {
+            Console.WriteLine("Load background and render card");
             using (Image image = Image.Load(getBackgroundImage(pokemonDefinition)))
             {
-                renderPokemonCard(image, pokemonDefinition);
-                image.Save(GeneralUtilities.outputDirectory + @"pokemon_cards" + Path.DirectorySeparatorChar + pokemonDefinition.name + ".png");
+                Console.WriteLine("Begin rendering card");
+                await renderPokemonCard(image, pokemonDefinition);
+                Console.WriteLine("Done rendering pokemon card. Time to Save card");
+
+                string savePath = $"{GeneralUtilities.renderedPokemonCardsDirectory}{pokemonDefinition.name}.png";
+                Console.WriteLine($"savePath: {savePath}");
+                image.Save(savePath);
+                Console.WriteLine("Done saving card to disk");
             }
         }
 
-        public void createTestAnimatedPokemonCard_gif(PokemonDefinition pokemonDefinition)
+        public async Task createTestAnimatedPokemonCard_gif(PokemonDefinition pokemonDefinition)
         {
             using Image gif = Image.Load(getBackgroundImage(pokemonDefinition));
 
@@ -66,7 +73,7 @@ namespace SpecterAI.pokemonStuff
                 pokemonDefinition.moveset[1].damage = (i * 10) + "";
                 using (Image image = Image.Load(getBackgroundImage(pokemonDefinition)))
                 {
-                    renderPokemonCard(image, pokemonDefinition);
+                    await renderPokemonCard(image, pokemonDefinition);
 
                     metadata = image.Frames.RootFrame.Metadata.GetGifMetadata();
                     metadata.FrameDelay = frameDelay;
@@ -81,7 +88,7 @@ namespace SpecterAI.pokemonStuff
         }
 
         // Discord can't display .webp format so it'll appear as a downloadable file instead. 
-        public void createTestAnimatedPokemonCard_webp(PokemonDefinition pokemonDefinition)
+        public async Task createTestAnimatedPokemonCard_webp(PokemonDefinition pokemonDefinition)
         {
             using Image gif = Image.Load(getBackgroundImage(pokemonDefinition));
 
@@ -100,7 +107,7 @@ namespace SpecterAI.pokemonStuff
                 pokemonDefinition.moveset[1].damage = (i * 10) + "";
                 using (Image image = Image.Load(getBackgroundImage(pokemonDefinition)))
                 {
-                    renderPokemonCard(image, pokemonDefinition);
+                    await renderPokemonCard(image, pokemonDefinition);
 
                     metadata = image.Frames.RootFrame.Metadata.GetWebpMetadata();
                     metadata.FrameDelay = frameDelay;
@@ -127,23 +134,45 @@ namespace SpecterAI.pokemonStuff
             renderRetreatCost(image, definition);
             await renderIllustrator(image, definition);
             renderRarity(image, definition);
+
         }
 
         private string getBackgroundImage(PokemonDefinition definition)
         {
-            string baseDirectory = GeneralUtilities.resourceDirector + @"pokemon\cardBlanks\";
+            string backgroundPath = GeneralUtilities.resourceDirectory + @"pokemon\CardBlanks\";
             switch (definition.type)
             {
+                case PokemonType.ELECTRIC:
+                    backgroundPath += "Electric.png";
+                    break;
+                case PokemonType.FIGHTING:
+                    backgroundPath += "Fighting.png";
+                    break;
                 case PokemonType.FIRE:
-                    return baseDirectory + "Fire.png";
+                    backgroundPath += "Fire.png";
+                    break;
+                case PokemonType.GRASS:
+                    backgroundPath += "Grass.png";
+                    break;
+                case PokemonType.NORMAL:
+                    backgroundPath += "Normal.png";
+                    break;
+                case PokemonType.PSYCHIC:
+                    backgroundPath += "Psychic.png";
+                    break;
+                case PokemonType.WATER:
+                    backgroundPath += "Water.png";
+                    break;
                 default:
-                    return baseDirectory + "Fire_big.png";
+                    backgroundPath += "Normal.png";
+                    break;
             }
+            return backgroundPath;
         }
 
         private string getTypeIconFilePath(PokemonType type)
         {
-            string iconPath = GeneralUtilities.resourceDirector + "pokemon" + Path.DirectorySeparatorChar + "typeIcons" + Path.DirectorySeparatorChar;
+            string iconPath = GeneralUtilities.resourceDirectory + "pokemon" + Path.DirectorySeparatorChar + "typeIcons" + Path.DirectorySeparatorChar;
             switch(type)
             {
                 case PokemonType.DARK:
@@ -191,7 +220,6 @@ namespace SpecterAI.pokemonStuff
             RectangleF boundingBox = getBoundingBox(image, 66, 7, 83, 10.5f);
             Font font = new Font(defaultBold, 100);
             await textHelper.renderText(image, Brushes.Solid(Color.Red), font, boundingBox, definition.health + " HP", HorizontalAlignment.Right, VerticalAlignment.Bottom);
-
         }
 
         private async Task renderDetails(Image image, PokemonDefinition definition)
@@ -403,14 +431,17 @@ namespace SpecterAI.pokemonStuff
 
         private void renderRetreatCost(Image image, PokemonDefinition definition)
         {
-            RectangleF boundingBox = getBoundingBox(image, 70, 84.5f, 93, 88.5f);
-            using (Image retreatIcon = Image.Load(getTypeIconFilePath(PokemonType.NORMAL)))
+            if (definition.retreatCost > 0)
             {
-                retreatIcon.Mutate(o => o.Resize(new Size((int)boundingBox.Height, (int)boundingBox.Height)));
-                int offset = (int)(boundingBox.Width) / definition.retreatCost;
-                for(int i = 0; i < definition.retreatCost; i++)
+                RectangleF boundingBox = getBoundingBox(image, 70, 84.5f, 93, 88.5f);
+                using (Image retreatIcon = Image.Load(getTypeIconFilePath(PokemonType.NORMAL)))
                 {
-                    image.Mutate(o => o.DrawImage(retreatIcon, new Point((int)boundingBox.X + (i * offset), (int)boundingBox.Y + 1), 1f));
+                    retreatIcon.Mutate(o => o.Resize(new Size((int)boundingBox.Height, (int)boundingBox.Height)));
+                    int offset = (int)(boundingBox.Width) / definition.retreatCost;
+                    for (int i = 0; i < definition.retreatCost; i++)
+                    {
+                        image.Mutate(o => o.DrawImage(retreatIcon, new Point((int)boundingBox.X + (i * offset), (int)boundingBox.Y + 1), 1f));
+                    }
                 }
             }
         }
@@ -429,7 +460,7 @@ namespace SpecterAI.pokemonStuff
         {
             RectangleF boundingBox = getBoundingBox(image, 92f, 94.5f, 95.25f, 96.5f);
 
-            string iconPath = GeneralUtilities.resourceDirector;
+            string iconPath = GeneralUtilities.resourceDirectory;
             switch (definition.rarity)
             {
                 case CardRarity.COMMON:

@@ -113,21 +113,21 @@ namespace SpecterAI.services
         {
             get
             {
-                return GeneralUtilities.resourceDirector + "permissions" + Path.DirectorySeparatorChar + "permissions.txt";
+                return GeneralUtilities.resourceDirectory + "permissions" + Path.DirectorySeparatorChar + "permissions.txt";
             }
         }
         private static string bannerUsersFile
         {
             get
             {
-                return GeneralUtilities.resourceDirector + "permissions" + Path.DirectorySeparatorChar + "banned_users.txt";
+                return GeneralUtilities.resourceDirectory + "permissions" + Path.DirectorySeparatorChar + "banned_users.txt";
             }
         }
         private static string metadataFile
         {
             get
             {
-                return GeneralUtilities.resourceDirector + "permissions" + Path.DirectorySeparatorChar + "user_metadata.txt";
+                return GeneralUtilities.resourceDirectory + "permissions" + Path.DirectorySeparatorChar + "user_metadata.txt";
             }
         }
 

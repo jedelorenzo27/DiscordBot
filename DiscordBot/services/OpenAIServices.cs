@@ -85,7 +85,7 @@ namespace SpecterAI.services
 
     public static class OpenAIServices
     {
-        public async static Task<string> Chat(HttpClient client, Conversation conversation)
+        public async static Task<string> Chat(Conversation conversation)
         {
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions"))
             {
@@ -102,11 +102,11 @@ namespace SpecterAI.services
 
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAiApiToken);
                 requestMessage.Content = contentString;
-                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
+                HttpResponseMessage responseMessage = await Program._httpClient.SendAsync(requestMessage);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
                 try
                 {
-                    conversation.printConversation();
+                    //conversation.printConversation();
                     dynamic something = JsonConvert.DeserializeObject<dynamic>(stringContent);
                     return something.choices[0].message.content;
                 } catch (Exception ex)
@@ -116,9 +116,8 @@ namespace SpecterAI.services
             }
         }
 
-        public static async Task<string> Image(HttpClient client, string prompt)
+        public static async Task<string> Image(string prompt, string saveDirectory, string fileName)
         {
-
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/images/generations"))
             {
                 var requestData = new
@@ -134,24 +133,32 @@ namespace SpecterAI.services
 
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAiApiToken);
                 requestMessage.Content = contentString;
-                HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
+                HttpResponseMessage responseMessage = await Program._httpClient.SendAsync(requestMessage);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
                 try
                 {
                     dynamic something = JsonConvert.DeserializeObject<dynamic>(stringContent);
                     string imageURL = something.data[0].url;
-                    var res = await client.GetAsync(imageURL);
+                    var res = await Program._httpClient.GetAsync(imageURL);
 
                     byte[] bytes = await res.Content.ReadAsByteArrayAsync();
-                    string tempImageName = "tempimage.png";
-                    await HttpUtilities.DownloadFileAsync(client, imageURL, GeneralUtilities.outputDirectory + @"temp" + Path.DirectorySeparatorChar + tempImageName);
-                    return tempImageName;
+                    Console.WriteLine($"imageURL: {imageURL}");
+                    Console.WriteLine($"saveDirectory: {saveDirectory}");
+                    Console.WriteLine($"fileName: {fileName}");
+                    await HttpUtilities.DownloadFileAsync(Program._httpClient, imageURL, saveDirectory + fileName);
+                    return fileName;
                 }
                 catch (Exception ex)
                 {
                     return "Something broke: " + ex.Message;
                 }
             }
+        }
+
+        public static async Task<string> Image(string prompt)
+        {
+            string tempImageName = "tempimage.png";
+            return await Image(prompt, GeneralUtilities.outputDirectory + @"temp" + Path.DirectorySeparatorChar, tempImageName);
         }
 
         

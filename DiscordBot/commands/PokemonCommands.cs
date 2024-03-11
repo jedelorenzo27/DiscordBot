@@ -30,16 +30,16 @@ namespace SpecterAI.commands
             PokemonDefinition definition = await generator.generateAiPokemonDefinition(Context, name);
 
             PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
-            renderer.createTestPokemonCard(definition);
+            await renderer.createTestPokemonCard(definition);
 
-            FileAttachment renderedCard = new FileAttachment(GeneralUtilities.renderedPokemonCardsDirectory + "FireGuy.png");
+            FileAttachment renderedCard = new FileAttachment(GeneralUtilities.renderedPokemonCardsDirectory + definition.name + ".png");
             LinkedList<FileAttachment> list = new LinkedList<FileAttachment>();
             list.AddFirst(renderedCard);
             Action<MessageProperties> action = (x) => { x.Attachments = list; x.Content = "done"; };
-            await ModifyOriginalResponseAsync(action);
-
+            //await ModifyOriginalResponseAsync(action);
+            await FollowupWithFilesAsync(list);
             stopwatch.Stop();
-            await FollowupAsync("Completed in " + stopwatch.ElapsedMilliseconds / 1000.0f + " seconds.");
+            //await FollowupAsync("Completed in " + stopwatch.ElapsedMilliseconds / 1000.0f + " seconds.");
         }
     }
 }

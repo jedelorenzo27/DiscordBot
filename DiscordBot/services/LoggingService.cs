@@ -19,7 +19,7 @@ namespace SpecterAI.services
         {
             get
             {
-                return GeneralUtilities.resourceDirector + "logging" + Path.DirectorySeparatorChar + "debug_channels.txt";
+                return GeneralUtilities.resourceDirectory + "logging" + Path.DirectorySeparatorChar + "debug_channels.txt";
             }
         }
 

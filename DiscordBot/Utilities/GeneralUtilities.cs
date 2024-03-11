@@ -10,7 +10,7 @@ namespace SpecterAI.Utilities
     {
 
 
-        public static string resourceDirector
+        public static string resourceDirectory
         {
             get
             {
@@ -30,7 +30,7 @@ namespace SpecterAI.Utilities
         {
             get
             {
-                return getRootDirectory() + Path.DirectorySeparatorChar + "pokemon_portraits" + Path.DirectorySeparatorChar;
+                return outputDirectory + "pokemon_portraits" + Path.DirectorySeparatorChar;
             }
         }
 
@@ -38,7 +38,7 @@ namespace SpecterAI.Utilities
         {
             get
             {
-                return getRootDirectory() + Path.DirectorySeparatorChar + "pokemon_cards" + Path.DirectorySeparatorChar;
+                return outputDirectory + "pokemon_cards" + Path.DirectorySeparatorChar;
             }
         }
 

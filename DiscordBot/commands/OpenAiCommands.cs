@@ -23,7 +23,7 @@ namespace SpecterAI.commands
             Stopwatch stopwatch = new Stopwatch();
             await DeferAsync();
             conversation.addMessage(MessageRole.USER, prompt);
-            string response = await OpenAIServices.Chat(Program._httpClient, conversation);
+            string response = await OpenAIServices.Chat(conversation);
             conversation.addMessage(MessageRole.SYSTEM, response);
             Action<MessageProperties> action = (x) => { x.Content = response; };
             await ModifyOriginalResponseAsync(action);
@@ -50,7 +50,7 @@ namespace SpecterAI.commands
             Action<MessageProperties>? action = (x) => { x.Content = "Generating image..."; };
             await ModifyOriginalResponseAsync(action);
 
-            string response = await OpenAIServices.Image(Program._httpClient, prompt);
+            string response = await OpenAIServices.Image(prompt);
             string fileLocation = GeneralUtilities.outputDirectory + @"temp" + Path.DirectorySeparatorChar + response;
 
             if (File.Exists(fileLocation) || true)
