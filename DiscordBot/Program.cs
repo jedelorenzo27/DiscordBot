@@ -25,7 +25,7 @@ public class Program
         handler.UseDefaultCredentials = true;
         handler.UseProxy = false;
         _httpClient = new HttpClient(handler);
-        SecretsHandler.LoadSecrets();
+        SecretsHandler.InitializeConfiguration();
         PermissionsService.LoadPermissions();
         await ShameTrainServices.JumpStartShameTrain();
 
@@ -68,7 +68,7 @@ public class Program
         _client.InteractionCreated += HandleInteractionAsync;
 
 
-        string token = SecretsHandler.DiscordToken;
+        string token = SecretsHandler.DiscordToken().Result;
         await _client.LoginAsync(TokenType.Bot, token);
         await _client.StartAsync();
 

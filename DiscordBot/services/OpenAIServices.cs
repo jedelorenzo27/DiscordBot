@@ -101,7 +101,7 @@ namespace SpecterAI.services
                 var jsonContent = JsonConvert.SerializeObject(requestData);
                 var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAiApiToken);
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await SecretsHandler.OpenAiApiToken());
                 requestMessage.Content = contentString;
                 HttpResponseMessage responseMessage = await Program._httpClient.SendAsync(requestMessage);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
@@ -132,7 +132,7 @@ namespace SpecterAI.services
                 var jsonContent = JsonConvert.SerializeObject(requestData);
                 var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SecretsHandler.OpenAiApiToken);
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await SecretsHandler.OpenAiApiToken());
                 requestMessage.Content = contentString;
                 HttpResponseMessage responseMessage = await Program._httpClient.SendAsync(requestMessage);
                 string stringContent = await responseMessage.Content.ReadAsStringAsync();
