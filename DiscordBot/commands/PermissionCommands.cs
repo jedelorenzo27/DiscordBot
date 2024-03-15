@@ -71,6 +71,14 @@ namespace SpecterAI.commands
             [Choice("Pokemon", "Pokemon")]
             [Choice("OpenAiChat", "OpenAiChat")]
             [Choice("OpenAiImage", "OpenAiImage")]
+            [Choice("Shame", "Shame")]
+            [Choice("CreateChallenge", "CreateChallenge")]
+            [Choice("DeleteChallenge", "DeleteChallenge")]
+            [Choice("SubmitChallenge", "SubmitChallenge")]
+            [Choice("VerifySubmission", "VerifySubmission")]
+            [Choice("SubscribeShameTrain", "SubscribeShameTrain")]
+            [Choice("UnsubscribeShameTrain", "UnsubscribeShameTrain")]
+            [Choice("ViewChallengeSubmissions", "ViewChallengeSubmissions")]
             string permission)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.GrantPermission);

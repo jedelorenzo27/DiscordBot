@@ -89,10 +89,16 @@ namespace DiscordBot.services
             );
             await newThread.SendMessageAsync(leetcodeURL);
             await newThread.SendMessageAsync($"{date},{challengeId},{challengeName}");
-            if (Context.Channel.Id == Constants.ByteLordzCringeCave_Channel_The_Daily)
+
+            HashSet<ulong> subscribedUsers = await ShameTrainFileLoader.LoadSubscribedUsers();
+            List<string> userMentions = new List<string>();
+            foreach (ulong user in subscribedUsers)
             {
-                await newThread.SendMessageAsync($"{MentionUtils.MentionRole(Constants.ByteLordzCringeCave_Role_Unemployed)}{MentionUtils.MentionRole(Constants.ByteLordzCringeCave_Role_Everyone)}");
+                userMentions.Add($"<@{user}>");
             }
+
+            await newThread.SendMessageAsync($"{string.Join(",", userMentions)}");
+
 
             // Grant permissions - this will give everyone in the challenge thread the following permissions
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubmitChallenge);
@@ -273,7 +279,7 @@ namespace DiscordBot.services
             try
             {
                 string fileName = $"{userId}.{language}";
-                string fullFilePath = $"{Constants.ShameTrainChallengeDirectory}{challangeId}{Constants.slash}{fileName}";
+                string fullFilePath = $"{Constants.ShameTrainChallengeDirectory}{challangeId}{Constants.slash}{Constants.ShameTrainChallengeSolutionDirectory}{fileName}";
                 return File.ReadAllLines(fullFilePath);
             } catch (Exception ex)
             {
