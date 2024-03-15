@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using SpecterAI.services;
 using System.Diagnostics;
 using SpecterAI.Utilities;
+using DiscordBot.Utilities;
 
 namespace SpecterAI.commands
 {
@@ -32,7 +33,7 @@ namespace SpecterAI.commands
             PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
             await renderer.createTestPokemonCard(definition);
 
-            FileAttachment renderedCard = new FileAttachment(GeneralUtilities.renderedPokemonCardsDirectory + definition.name + ".png");
+            FileAttachment renderedCard = new FileAttachment(Constants.RenderedPokemonCardsDirectory + definition.name + ".png");
             LinkedList<FileAttachment> list = new LinkedList<FileAttachment>();
             list.AddFirst(renderedCard);
             Action<MessageProperties> action = (x) => { x.Attachments = list; x.Content = "done"; };

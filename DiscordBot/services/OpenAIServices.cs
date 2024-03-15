@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using DiscordBot.Utilities;
 using Newtonsoft.Json;
 using SpecterAI.Utilities;
 using System;
@@ -158,7 +159,7 @@ namespace SpecterAI.services
         public static async Task<string> Image(string prompt)
         {
             string tempImageName = "tempimage.png";
-            return await Image(prompt, GeneralUtilities.outputDirectory + @"temp" + Path.DirectorySeparatorChar, tempImageName);
+            return await Image(prompt, Constants.OutputDirectory + @"temp" + Path.DirectorySeparatorChar, tempImageName);
         }
 
         

@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using DiscordBot.Utilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SpecterAI.pokemonStuff;
@@ -403,7 +404,7 @@ namespace SpecterAI
             imagePrompt += $"This pokemon weighs {definition.weight}. ";
             imagePrompt += $"This pokemon is {definition.type} type. ";
             definition.portraitFileName = $"{definition.name}_temp.png";
-            await OpenAIServices.Image(imagePrompt, GeneralUtilities.pokemonPortraitsDirectory, definition.portraitFileName);
+            await OpenAIServices.Image(imagePrompt, Constants.RenderedPokemonCardsDirectory, definition.portraitFileName);
             
         }
 

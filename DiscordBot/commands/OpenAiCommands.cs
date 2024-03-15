@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using DiscordBot.Utilities;
 using SpecterAI.services;
 using SpecterAI.Utilities;
 using System;
@@ -51,7 +52,7 @@ namespace SpecterAI.commands
             await ModifyOriginalResponseAsync(action);
 
             string response = await OpenAIServices.Image(prompt);
-            string fileLocation = GeneralUtilities.outputDirectory + @"temp" + Path.DirectorySeparatorChar + response;
+            string fileLocation = Constants.TempDirectory + response;
 
             if (File.Exists(fileLocation) || true)
             {

@@ -368,3 +368,5 @@ FodyWeavers.xsd
 /DiscordBot/resources/permissions/user_metadata.txt
 /DiscordBot/resources/permissions/banned_users.txt
 /DiscordBot/output*
+/DiscordBot/resources/shame_train
+/DiscordBot/shame_train

@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using DiscordBot.Utilities;
 using SpecterAI.Utilities;
 using System;
 using System.Collections.Generic;
@@ -83,53 +84,48 @@ namespace SpecterAI.services
     {
         [Description("All")]
         All,
-        [Description("GrantPermission")]
+        [Description("Grant Permission")]
         GrantPermission,
-        [Description("RemovePermission")]
+        [Description("Remove Permission")]
         RemovePermission,
-        [Description("ViewPermissions")]
+        [Description("View Permissions")]
         ViewPermissions,
-        [Description("ViewUsage")]
+        [Description("View Usage")]
         ViewUsage,
-        [Description("BanOther")]
+        [Description("Ban Other")]
         BanOther,
         [Description("Pokemon")]
         Pokemon,
-        [Description("OpenAiChat")]
+        [Description("OpenAI Chat")]
         OpenAiChat,
-        [Description("OpenAiImage")]
+        [Description("OpenAI Image")]
         OpenAiImage,
+        [Description("Shame users for not completing the daily")]
+        Shame,
+        [Description("Create Challenge")]
+        CreateChallenge,
+        [Description("Delete Challenge")]
+        DeleteChallenge,
+        [Description("Submit Challenge")]
+        SubmitChallenge,
+        [Description("Verify Challenge Submission")]
+        VerifySubmission,
+        [Description("Subscribe To ShameTrain")]
+        SubscribeShameTrain,
+        [Description("Unsubscribe From ShameTrain")]
+        UnsubscribeShameTrain,
+        [Description("View Challenge Submissions")]
+        ViewChallengeSubmissions,
     }
 
     public static class PermissionsService
     {
+        private static string DevLogsChannelId = "1103512627675672608";
         private static string JayUserId = "222127402980081667";
         private static string JonathanUserId = "429310221861519374";
         private static string ChrisUserId = "447113923162800148";
         private static string globalId = "global_access";
         private static HashSet<string> unbannable = new HashSet<string>() { globalId, JayUserId, JonathanUserId, ChrisUserId };
-
-        private static string permissionsFile
-        {
-            get
-            {
-                return GeneralUtilities.resourceDirectory + "permissions" + Path.DirectorySeparatorChar + "permissions.txt";
-            }
-        }
-        private static string bannerUsersFile
-        {
-            get
-            {
-                return GeneralUtilities.resourceDirectory + "permissions" + Path.DirectorySeparatorChar + "banned_users.txt";
-            }
-        }
-        private static string metadataFile
-        {
-            get
-            {
-                return GeneralUtilities.resourceDirectory + "permissions" + Path.DirectorySeparatorChar + "user_metadata.txt";
-            }
-        }
 
         private static Dictionary<string, HashSet<Entitlement>> _permissions = new Dictionary<string, HashSet<Entitlement>>();
         private static HashSet<string> _bannedUsers = new HashSet<string>();
@@ -139,9 +135,34 @@ namespace SpecterAI.services
         {
             _permissions = new Dictionary<string, HashSet<Entitlement>>();
             _bannedUsers = new HashSet<string>();
-            LoadUserPermissions();
-            LoadBannedUsers();
-            LoadMetadata();
+            if (!Directory.Exists(Constants.BasePermissionPath))
+            {
+                Directory.CreateDirectory(Constants.BasePermissionPath);
+            } else
+            {
+                LoadUserPermissions();
+                LoadBannedUsers();
+                LoadMetadata();
+            }
+
+            /*
+            if (!_permissions.ContainsKey(DevLogsChannelId))
+            {
+                _permissions.Add(DevLogsChannelId, new HashSet<Entitlement>());
+            }
+            _permissions[DevLogsChannelId].Add(Entitlement.All);
+            */
+
+            if (!_permissions.ContainsKey(JayUserId))
+            {
+                _permissions.Add(JayUserId, new HashSet<Entitlement>());
+            }
+            _permissions[JayUserId].Add(Entitlement.CreateChallenge);
+        }
+
+        public static string GetNameFromId(ulong user_id)
+        {
+            return GetNameFromId(user_id.ToString());  
         }
 
         public static string GetNameFromId(string user_id)
@@ -157,14 +178,19 @@ namespace SpecterAI.services
         {
             if (!_permissions.ContainsKey(idToGiveEntitlement))
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"Granting permission ({EnumExtensions.ToDescriptionString(entitlement)}) to user:{GetNameFromId(idToGiveEntitlement)}");
                 _permissions.Add(idToGiveEntitlement, new HashSet<Entitlement>());
-            } else
+            }
+
+            if (!_permissions[idToGiveEntitlement].Contains(entitlement))
+            {
+                await LoggingService.LogMessage(LogLevel.Info, $"Granting permission ({EnumExtensions.ToDescriptionString(entitlement)}) to user:{GetNameFromId(idToGiveEntitlement)}");
+                _permissions[idToGiveEntitlement].Add(entitlement);
+                await SaveUserPermissions();
+            }
+            else
             {
                 await LoggingService.LogMessage(LogLevel.Info, $"user:{GetNameFromId(idToGiveEntitlement)} already has ${EnumExtensions.ToDescriptionString(entitlement)}");
             }
-            _permissions[idToGiveEntitlement].Add(entitlement);
-            SaveUserPermissions();
         }
 
         public static async Task RemovePermission(SocketInteractionContext context, string idToRemoveEntitlement, Entitlement entitlement)
@@ -179,7 +205,7 @@ namespace SpecterAI.services
                 {
                     await LoggingService.LogMessage(LogLevel.Info, $"Removing permission ({EnumExtensions.ToDescriptionString(entitlement)}) from user:{GetNameFromId(idToRemoveEntitlement)}");
                     _permissions[idToRemoveEntitlement].Remove(entitlement);
-                    SaveUserPermissions();
+                    await SaveUserPermissions();
                 }
             } else
             {
@@ -198,7 +224,7 @@ namespace SpecterAI.services
             }
             await LoggingService.LogMessage(LogLevel.Info, $"Banning user: {GetNameFromId(idToBan)}");
             _bannedUsers.Add(idToBan);
-            SaveBannedUsers();
+            await SaveBannedUsers();
         }
 
         public static Entitlement[] GetUserEntitlements(string id)
@@ -219,20 +245,20 @@ namespace SpecterAI.services
             return null;
         }
 
-        private static void recordPermissionCheck(string id, string name, Entitlement entitlement)
+        private static async Task recordPermissionCheck(string id, string name, Entitlement entitlement)
         {
             if (!_userMetadata.ContainsKey(id)) 
             {
                 _userMetadata.Add(id, new UserMetadata(name, id));
             }
             _userMetadata[id].IncrementEntitlementCount(entitlement);
-            SaveMetadata();
+            await SaveMetadata();
         }
 
         public static async Task<bool> ValidatePermissions(SocketInteractionContext context, Entitlement entitlement)
         {
-            recordPermissionCheck(context.User.Id.ToString(), context.User.Username, entitlement);
-            recordPermissionCheck(context.Guild.Id.ToString(), context.Guild.Name, entitlement);
+            await recordPermissionCheck(context.User.Id.ToString(), context.User.Username, entitlement);
+            await recordPermissionCheck(context.Guild.Id.ToString(), context.Guild.Name, entitlement);
 
             if (_bannedUsers.Contains(context.User.Id.ToString())) {
                 await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}' due to being banned.");
@@ -247,6 +273,13 @@ namespace SpecterAI.services
             if (_permissions.ContainsKey(context.Guild.Id.ToString())
                 && (_permissions[context.Guild.Id.ToString()].Contains(entitlement)
                 || _permissions[context.Guild.Id.ToString()].Contains(Entitlement.All)))
+            {
+                return true;
+            }
+
+            if (_permissions.ContainsKey(context.Channel.Id.ToString())
+                && (_permissions[context.Channel.Id.ToString()].Contains(entitlement)
+                || _permissions[context.Channel.Id.ToString()].Contains(Entitlement.All)))
             {
                 return true;
             }
@@ -318,9 +351,9 @@ namespace SpecterAI.services
         {
             try
             {
-                if (File.Exists(permissionsFile))
+                if (File.Exists(Constants.PermissionsFilePath))
                 {
-                    string[] lines = File.ReadAllLines(permissionsFile);
+                    string[] lines = File.ReadAllLines(Constants.PermissionsFilePath);
                     foreach (string line in lines)
                     {
                         string[] lineSplit = line.Split(':');
@@ -358,9 +391,9 @@ namespace SpecterAI.services
         {
             try
             {
-                if (File.Exists(bannerUsersFile))
+                if (File.Exists(Constants.BannedUsersFilePath))
                 {
-                    string[] lines = File.ReadAllLines(bannerUsersFile);
+                    string[] lines = File.ReadAllLines(Constants.BannedUsersFilePath);
                     foreach (string id in lines)
                     {
                         _bannedUsers.Add(id);
@@ -378,9 +411,9 @@ namespace SpecterAI.services
         {
             try
             {
-                if (File.Exists(metadataFile))
+                if (File.Exists(Constants.UserMetadataFilePath))
                 {
-                    string[] lines = File.ReadAllLines(metadataFile);
+                    string[] lines = File.ReadAllLines(Constants.UserMetadataFilePath);
                     foreach (string line in lines)
                     {
                         UserMetadata metadata = new UserMetadata(line);
@@ -394,20 +427,20 @@ namespace SpecterAI.services
             }
         }
 
-        public static void SaveAll()
+        public static async Task SaveAll()
         {
-            SaveUserPermissions();
-            SaveBannedUsers();
-            SaveMetadata();
+            await SaveUserPermissions();
+            await SaveBannedUsers();
+            await SaveMetadata();
         }
 
-        private static void SaveUserPermissions()
+        private static async Task SaveUserPermissions()
         {
             try
             {
-                if (File.Exists(permissionsFile))
+                if (File.Exists(Constants.PermissionsFilePath))
                 {
-                    File.Delete(permissionsFile);
+                    File.Delete(Constants.PermissionsFilePath);
                 }
 
                 List<string> lines = new List<string>();
@@ -415,22 +448,25 @@ namespace SpecterAI.services
                 {
                     lines.Add(key + ":" + string.Join(",", _permissions[key]));
                 }
-                File.WriteAllLines(permissionsFile, lines.ToArray());
+                File.WriteAllLines(Constants.PermissionsFilePath, lines.ToArray());
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Something seriously bingo bongo'd while saving permissions file");
-                Console.WriteLine(ex.ToString());
+                string[] errors = new string[] {
+                    "Something seriously bingo bongo'd while saving permissions file",
+                    ex.ToString()
+                };
+                await LoggingService.LogMessage(LogLevel.Error, errors);
             }
         }
 
-        private static void SaveBannedUsers()
+        private static async Task SaveBannedUsers()
         {
             try
             {
-                if (File.Exists(bannerUsersFile))
+                if (File.Exists(Constants.BannedUsersFilePath))
                 {
-                    File.Delete(bannerUsersFile);
+                    File.Delete(Constants.BannedUsersFilePath);
                 }
 
                 List<string> lines = new List<string>();
@@ -438,22 +474,25 @@ namespace SpecterAI.services
                 {
                     lines.Add(bannedId);
                 }
-                File.WriteAllLines(bannerUsersFile, lines.ToArray());
+                File.WriteAllLines(Constants.BannedUsersFilePath, lines.ToArray());
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Something seriously bingo bongo'd while saving banned uers file");
-                Console.WriteLine(ex.ToString());
+                string[] errors = new string[] {
+                    "Something seriously bingo bongo'd while saving banned uers file",
+                    ex.ToString()
+                };
+                await LoggingService.LogMessage(LogLevel.Error, errors);
             }
         }
 
-        private static void SaveMetadata()
+        private static async Task SaveMetadata()
         {
             try
             {
-                if (File.Exists(metadataFile))
+                if (File.Exists(Constants.UserMetadataFilePath))
                 {
-                    File.Delete(metadataFile);
+                    File.Delete(Constants.UserMetadataFilePath);
                 }
 
                 List<string> lines = new List<string>();
@@ -461,12 +500,15 @@ namespace SpecterAI.services
                 {
                     lines.Add(_userMetadata[key].ToString());
                 }
-                File.WriteAllLines(metadataFile, lines.ToArray());
+                File.WriteAllLines(Constants.UserMetadataFilePath, lines.ToArray());
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Something seriously bingo bongo'd while saving user metadata file");
-                Console.WriteLine(ex.ToString());
+                string[] errors = new string[] {
+                    "Something seriously bingo bongo'd while saving user metadata file",
+                    ex.ToString()
+                };
+                await LoggingService.LogMessage(LogLevel.Error, errors);
             }
         }
     }

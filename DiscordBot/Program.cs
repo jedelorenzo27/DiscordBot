@@ -8,6 +8,7 @@ using SummaryAttribute = Discord.Commands.SummaryAttribute;
 using SpecterAI.pokemonStuff;
 using SpecterAI.services;
 using System.Net;
+using DiscordBot.services;
 
 public class Program
 {
@@ -20,15 +21,13 @@ public class Program
 
     public async Task MainAsync()
     {
-        _httpClient = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate });
+        HttpClientHandler handler = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate };
+        handler.UseDefaultCredentials = true;
+        handler.UseProxy = false;
+        _httpClient = new HttpClient(handler);
         SecretsHandler.LoadSecrets();
         PermissionsService.LoadPermissions();
-
-        //PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
-        //renderer.createTestAnimatedPokemonCard_gif();
-        //renderer.createTestAnimatedPokemonCard_webp();
-        //renderer.createTestPokemonCard();   
-        //return;
+        await ShameTrainServices.JumpStartShameTrain();
 
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,

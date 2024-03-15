@@ -1,11 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using DiscordBot.Utilities;
 using SpecterAI.Utilities;
 
 namespace SpecterAI.services
 {
     public enum LogLevel
     {
+        Action,
         Info,
         Debug,
         Error
@@ -15,18 +17,16 @@ namespace SpecterAI.services
     public static class LoggingService
     {
         private static string debug_channels_delimiter = "#";
-        private static string debug_channels_file
-        {
-            get
-            {
-                return GeneralUtilities.resourceDirectory + "logging" + Path.DirectorySeparatorChar + "debug_channels.txt";
-            }
-        }
 
 
         private static bool _ready = false;
         private static DiscordSocketClient? _discord;
         private static List<string> _debugChannels = new List<string>();
+
+        public static async Task LogMessage(LogLevel level, string[] messages)
+        {
+            await LogMessage(level, string.Join("\n", messages));
+        }
 
         public static async Task LogMessage(LogLevel level, string message)
         {
@@ -70,9 +70,9 @@ namespace SpecterAI.services
         {
             try
             {
-                if (File.Exists(debug_channels_file))
+                if (File.Exists(Constants.DebugChannelsFile))
                 {
-                    string[] lines = File.ReadAllLines(debug_channels_file);
+                    string[] lines = File.ReadAllLines(Constants.DebugChannelsFile);
                     foreach (string line in lines)
                     {
                         if (!line.StartsWith("#")) {

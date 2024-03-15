@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,6 +33,32 @@ namespace SpecterAI.Utilities
             File.WriteAllBytes(outputPath, fileBytes);
 
             Console.WriteLine("Done writing image");
+        }
+
+        public async static Task<string> downloadWebPage(string url)
+        {
+            // This doesn't work for sites (like leetcode). You'll get a 403 Forbidden if you're not authorized and I havent spent the time debug that.
+            try
+            {
+                Program._httpClient.DefaultRequestHeaders.TryAddWithoutValidation("user-agent","Other");
+                Program._httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,application/xml");
+                Program._httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Encoding", "gzip, deflate");
+                Program._httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Charset", "ISO-8859-1");
+                string page = await Program._httpClient.GetStringAsync(url).ConfigureAwait(false);
+                Console.WriteLine(page);
+                return page;
+
+            } catch (Exception ex)
+            {
+                string[] errorMessage = new string[]
+                {
+                    $"Failed to download webpage. Tried downloading from: {url}",
+                    ex.Message
+                };
+                await LoggingService.LogMessage(LogLevel.Error, errorMessage);
+            }
+            return "";
+            
         }
     }
 }

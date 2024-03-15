@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using DiscordBot.services;
+using DiscordBot.Utilities;
 using SixLabors.ImageSharp.PixelFormats;
 using SpecterAI.Utilities;
 using System;
@@ -20,7 +21,7 @@ namespace DiscordBot.commands
             await DeferAsync();
 
             string fileName = "tempImageLeetCodeImage.png";
-            string outputPath = $"{GeneralUtilities.outputDirectory}{Path.DirectorySeparatorChar}misc{Path.DirectorySeparatorChar}";
+            string outputPath = $"{Constants.OutputDirectory}{Path.DirectorySeparatorChar}misc{Path.DirectorySeparatorChar}";
 
             if (File.Exists(outputPath + fileName))
             {
