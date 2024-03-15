@@ -258,6 +258,7 @@ namespace SpecterAI.services
         public static async Task<bool> ValidatePermissions(SocketInteractionContext context, Entitlement entitlement)
         {
             await recordPermissionCheck(context.User.Id.ToString(), context.User.Username, entitlement);
+            await recordPermissionCheck(context.Channel.Id.ToString(), context.Channel.Name, entitlement);
             await recordPermissionCheck(context.Guild.Id.ToString(), context.Guild.Name, entitlement);
 
             if (_bannedUsers.Contains(context.User.Id.ToString())) {
