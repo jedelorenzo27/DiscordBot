@@ -153,6 +153,7 @@ public class Program
         .BuildServiceProvider(); // Creates the container with everything set up.
 }
 
+/*
 // Define a module for your text-based commands
 public class TextCommandModule : ModuleBase<SocketCommandContext>
 {
@@ -175,3 +176,4 @@ public class CommandModule : InteractionModuleBase<SocketInteractionContext>
         await RespondAsync(input);
     }
 }
+*/

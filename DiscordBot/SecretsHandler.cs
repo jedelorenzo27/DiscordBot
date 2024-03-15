@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SpecterAI.services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ public static class SecretsHandler
     private static Dictionary<string, string> secrets;
 
 
-    public static void LoadSecrets()
+    public static async Task LoadSecrets()
     {
         secrets = new Dictionary<string, string>();
         Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
@@ -17,10 +18,12 @@ public static class SecretsHandler
         string secretsFile = Root + Path.DirectorySeparatorChar + "resources" + Path.DirectorySeparatorChar + "secrets.txt";
         if (!File.Exists(secretsFile))
         {
-            for(int i = 0; i < 50; i++)
+            string[] errors = new string[]
             {
-                Console.WriteLine("!! Missing secrets.txt !!");
-            }
+                "Can't find secrets file. You're either missing it entirely or have it in the wrong location.",
+                "secrets.txt needs to be under the resources folder 'resources/secrets.txt"
+            };
+            await LoggingService.LogMessage(LogLevel.ConfigError, errors);
             return;
         }
 
@@ -33,6 +36,7 @@ public static class SecretsHandler
                 string[] parts = line.Split(':');
                 if (!line.StartsWith('#') && parts.Length == 2)
                 {
+                    await LoggingService.LogMessage(LogLevel.ConfigError, $"Adding secret entry for: {parts[0]}");
                     Console.WriteLine("Adding secret entry for: " + parts[0]);
                     secrets.Add(parts[0], parts[1]);
                 }

@@ -12,13 +12,19 @@ namespace DiscordBot.commands
         public async Task Shame()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.Shame);
+            await LoggingService.LogCommandUse(Context, "shame");
 
         }
 
         [SlashCommand("create-challenge", "Create a new challenge thread in the-daily")]
-        public async Task Create(string leetcodeURL, string challengeName, string challengeId)
+        public async Task Create(string leetcodeURL, 
+            [Choice("Easy", "Easy"),
+            Choice("Medium", "Medium"),
+            Choice("Hard", "Hard")
+            ] string difficulty, string challengeName, string challengeId)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.CreateChallenge);
+            await LoggingService.LogCommandUse(Context, "create-challenge");
             await ShameTrainServices.CreateDailyChallenge(Context, leetcodeURL, challengeName, challengeId);
             await RespondAsync(text: $"Created thread");
             await DeleteOriginalResponseAsync();
@@ -41,14 +47,25 @@ namespace DiscordBot.commands
             Choice("O(n)", "O(n)"),
             Choice("O(logn)", "O(logn)"),
             Choice("O(n)", "O(n)")
-            ] string TimeComplexity)
+            ] string timeComplexity)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubmitChallenge);
             await DeferAsync();
-            await LoggingService.LogMessage(LogLevel.Action, $"{PermissionsService.GetNameFromId(Context.User.Id)} submitted a solution in {PermissionsService.GetNameFromId(Context.Channel.Id)} ({PermissionsService.GetNameFromId(Context.Guild.Id)})");
-            await ShameTrainServices.SubmitSolution(Context, solution, language, TimeComplexity, Context.Channel.Id, Context.User.Id);
+            await LoggingService.LogCommandUse(Context, "submit-challenge");
+            string[] solutionLines = await ShameTrainServices.SubmitSolution(Context, solution, language, timeComplexity, Context.Channel.Id, Context.User.Id);
 
-            Action<MessageProperties> action = (x) => { x.Content = "Solution recorded! You're probably safe from the Shame Train... for now. You can verify submission by "; };
+            List<string> responseLines = new List<string>();
+            responseLines.Add($"Thanks for the submission, ${PermissionsService.GetNameFromId(Context.User.Id)}! You're probably safe from the Shame Train... for now. You can verify submission via /verify-submission ");
+            responseLines.Add("||```");
+            foreach(string line in solutionLines)
+            {
+                string sanitizedLine = line.Replace("||", "OR");
+                responseLines.Add(sanitizedLine);
+            }
+            responseLines.Add("```||");
+            responseLines.Add($"Completed in {timeComplexity}");
+
+            Action<MessageProperties> action = (x) => { x.Content = string.Join("\n", responseLines.ToArray()); };
             await ModifyOriginalResponseAsync(action);
         }
 
@@ -56,6 +73,8 @@ namespace DiscordBot.commands
         public async Task VerifySubmission()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.VerifySubmission);
+            await LoggingService.LogCommandUse(Context, "verify-submission");
+
             if (await ShameTrainServices.VerifySubmission(Context.Channel.Id, Context.User.Id)) {
                 await RespondAsync("You're good to go, brother. ");
             } else
@@ -64,33 +83,35 @@ namespace DiscordBot.commands
             }
         }
 
-
-
         [SlashCommand("subscribe", "subscribe to shame-train challenges")]
         public async Task Subscribe()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubscribeShameTrain);
+            await LoggingService.LogCommandUse(Context, "subscribe");
             await ShameTrainServices.SubscribeUser(Context, Context.User.Id);
             await RespondAsync($"Welcome aboard, {Context.User.Username}. The shame train arrives everyday Monday-Friday. The only way to ensure you're not on it is to complete #the-daily challenge and submit you're solution via /submit-challenge in the challenge thread. ");
         }
 
         [SlashCommand("unsubscribe", "unsubscribe from shame-train challenges - you may be shamed one last time")]
         public async Task Unsubscribe(
-            [Choice("I'm employed!", "0"),
-            Choice("I don't need to practice for interviews", "1"),
-            Choice("I desire shame!", "2"),
-            Choice("I desire shame!", "3"),
-            ] string reason)
+            [Choice("I'm employed!", 0),
+            Choice("I don't need to practice for interviews", 1),
+            Choice("I desire shame!", 2),
+            Choice("I desire shame!", 3),
+            ] int reason)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.UnsubscribeShameTrain);
+            await LoggingService.LogCommandUse(Context, "unsubscribe");
             await ShameTrainServices.UnsubscribeUser(Context, Context.User.Id);
             await RespondAsync($"Missing messages of shame. You're off the hook this time, {Context.User.Username}. Now get out of here you little scamp!");
         }
 
-        [SlashCommand("submissions", "View submissions for a given thread")]
+        [SlashCommand("view-submissions", "View submissions for a given thread")]
         public async Task ViewSubmissions()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.ViewChallengeSubmissions);
+            await LoggingService.LogCommandUse(Context, "submissions");
+
         }
 
     }

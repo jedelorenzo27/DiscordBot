@@ -17,7 +17,6 @@ namespace DiscordBot.services
     public static class ShameTrainServices
     {
         
-        private static HashSet<ulong> SubscribedUsers = new HashSet<ulong>();
 
         public static async Task JumpStartShameTrain()
         {
@@ -94,24 +93,27 @@ namespace DiscordBot.services
             return taskFiles.Length > 0;
         }
 
-        public static async Task SubmitSolution(SocketInteractionContext Context, Attachment solution, string language, string timeComplexity, ulong challengeId, ulong userId)
+        public static async Task<string[]> SubmitSolution(SocketInteractionContext Context, Attachment solution, string language, string timeComplexity, ulong challengeId, ulong userId)
         {
             await ShameTrainFileLoader.SaveSolution(solution, language, challengeId, userId);
+            return await ShameTrainFileLoader.LoadSolution(language, challengeId, userId);
         }
 
         public static async Task SubscribeUser(SocketInteractionContext Context, ulong userId)
         {
-            if (!SubscribedUsers.Contains(userId))
+            HashSet<ulong> subscribed_users = await ShameTrainFileLoader.LoadSubscribedUsers();
+            if (!subscribed_users.Contains(userId))
             {
-                SubscribedUsers.Add(userId);
-                await ShameTrainFileLoader.SaveSubscribedUsers(SubscribedUsers);
+                subscribed_users.Add(userId);
+                await ShameTrainFileLoader.SaveSubscribedUsers(subscribed_users);
             }
         }
 
         public static async Task UnsubscribeUser(SocketInteractionContext Context, ulong userId)
         {
-            SubscribedUsers.Remove(userId);
-            await ShameTrainFileLoader.SaveSubscribedUsers(SubscribedUsers);
+            HashSet<ulong> subscribed_users = await ShameTrainFileLoader.LoadSubscribedUsers();
+            subscribed_users.Remove(userId);
+            await ShameTrainFileLoader.SaveSubscribedUsers(subscribed_users);
         }
 
 
@@ -224,6 +226,25 @@ namespace DiscordBot.services
         public static void CopySubscribedUsersToChallengeFolder(string toFolder)
         {
             File.Copy(Constants.ShameTrainSubscribedUsersFilePath, $"{toFolder}{Constants.ShameTrainSubscribedUsersFileName}");
+        }
+
+        public static async Task<string[]> LoadSolution(string language, ulong challangeId, ulong userId)
+        {
+            try
+            {
+                string fileName = $"{userId}.{language}";
+                string fullFilePath = $"{Constants.ShameTrainChallengeDirectory}{challangeId}{Constants.slash}{fileName}";
+                return File.ReadAllLines(fullFilePath);
+            } catch (Exception ex)
+            {
+                string[] errors = new string[]
+                {
+                    $"Something went wrong while trying to load solution for challengeId={challangeId} userId={userId}",
+                    ex.Message
+                };
+                await LoggingService.LogMessage(LogLevel.Error, errors);
+            }
+            return new string[] { };
         }
 
         public static async Task SaveSolution(Attachment solution, string language, ulong challangeId, ulong userId)
