@@ -44,10 +44,14 @@ namespace SpecterAI.services
             await LogMessage(LogLevel.Action, $"{PermissionsService.GetNameFromId(context.User.Id)} used {command} in {PermissionsService.GetNameFromId(context.Channel.Id)} ({PermissionsService.GetNameFromId(context.Guild.Id)}) on {target_string}");
         }
 
+
+
         public static async Task LogMessage(LogLevel level, string[] messages, bool localOnly=false)
         {
             await LogMessage(level, string.Join("\n", messages));
         }
+
+
 
         public static async Task LogMessage(LogLevel level, string message, bool localOnly = false)
         {
