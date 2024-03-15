@@ -11,9 +11,52 @@ namespace DiscordBot.commands
         [SlashCommand("shame", "Shame users for not completing the daily")]
         public async Task Shame()
         {
+            Console.WriteLine("Shaming");
             await PermissionsService.ValidatePermissions(Context, Entitlement.Shame);
+            //await DeferAsync();
             await LoggingService.LogCommandUse(Context, "shame");
 
+            Dictionary<ulong, int>  allUsers = await ShameTrainServices.UserIdsToDaysSinceLastSubmission(Context);
+            Dictionary<ulong, int> usersNeedingShaming = new Dictionary<ulong, int>();
+            List<ulong> usersSafeFromShame = new List<ulong>();
+
+            Console.WriteLine("Shaming users");
+            foreach(ulong userId in allUsers.Keys)
+            {
+                Console.WriteLine($"{userId}: {allUsers[userId]}");
+                if (allUsers[userId] == 0)
+                {
+                    usersSafeFromShame.Add(userId);
+                } else
+                {
+                   usersNeedingShaming.Add(userId, allUsers[userId]);
+                }
+            }
+
+            List<string> messageLines = new List<string>();
+            messageLines.Add(":shame_badge: Shame Train is Arriving :shame_badge:");
+
+            foreach(ulong user in usersNeedingShaming.Keys) 
+            {
+                messageLines.Add($"<@{user}> {usersNeedingShaming[user]}");
+            }
+
+            if (usersSafeFromShame.Count > 0)
+            {
+                messageLines.Add("----------------------");
+                messageLines.Add("SAFE");
+
+                foreach (ulong user in usersSafeFromShame)
+                {
+                    messageLines.Add($":shame_train:<@{user}>");
+                }
+            } else
+            {
+                messageLines.Add($"No one was saved.");
+            }
+            Console.WriteLine("Sending discord message of shame");
+
+            await RespondAsync(string.Join("\n", messageLines.ToArray()));
         }
 
         [SlashCommand("create-challenge", "Create a new challenge thread in the-daily")]

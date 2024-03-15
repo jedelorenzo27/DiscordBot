@@ -18,7 +18,7 @@
   <ItemGroup>
     <Folder Include="output\pokemon_cards\" />
     <Folder Include="output\temp\" />
-    <Folder Include="resources\shame_train\challenges\" />
+    <Folder Include="resources\shame_train\challenges\1218267691454828564\solutions\" />
   </ItemGroup>
 
 </Project>

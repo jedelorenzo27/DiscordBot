@@ -32,7 +32,6 @@ namespace DiscordBot.Utilities
         public static string DebugChannelsFile = $"{ResourceDirectory}logging{slash}debug_channels.txt";
 
         // Permission:
-        //public static 
         public static string BasePermissionPath = $"{ResourceDirectory}permissions{slash}";
         public static string PermissionsFileName = $"permissions.txt";
         public static string PermissionsFilePath = $"{BasePermissionPath}{PermissionsFileName}";
@@ -48,16 +47,19 @@ namespace DiscordBot.Utilities
         public static string ShameTrainSubscribedUsersFilePath = $"{ResourceDirectory}shame_train{slash}{ShameTrainSubscribedUsersFileName}";
         public static string ShameTrainSubscribedUsersFileDelimiter = ",";
         public static string ShameTrainChallengeDirectory = $"{ResourceDirectory}shame_train{slash}challenges{slash}";
+        public static string ShameTrainChallengeSolutionFolderName = $"solutions";
+        public static string ShameTrainChallengeSolutionDirectory = $"{ShameTrainChallengeSolutionFolderName}{slash}";
         
-        //Metadata Fields
+        
+        // ShameTrain Metadata Fields
         public const string ChallengeName = "ChallengeName";
         public const string ChallengeId = "ChallengeId";
         public const string ChallengeDate = "ChallengeDate";
+        public const string ChallengeVersion = "version";
 
         // Pokemon
         public static string FontDirectory = $"{ResourceDirectory}fonts{slash}";
         public static string PokemonPortraitsDirectory = $"{OutputDirectory}pokemon_portraits{slash}";
         public static string RenderedPokemonCardsDirectory = $"{OutputDirectory}pokemon_cards{slash}";
-
     }
 }

@@ -3,35 +3,76 @@ using Discord.Interactions;
 using SpecterAI.services;
 using DiscordBot.Utilities;
 using SpecterAI.Utilities;
+using Version = DiscordBot.Utilities.Version;
 
 namespace DiscordBot.services
 {
-
     public class ChallengeDetails
     {
         public string ChallengeName = "";
         public int ChallengeId = -1;
         public string ChallengeDate = "";
+        public Version version = new Version(1,0,0);
     }
 
     public static class ShameTrainServices
     {
-        
-
         public static async Task JumpStartShameTrain()
         {
-            SubscribedUsers = await ShameTrainFileLoader.LoadSubscribedUsers();
-
-            if (!Directory.Exists(Constants.ShameTrainChallengeDirectory))
+            try
             {
-                Directory.CreateDirectory(Constants.ShameTrainChallengeDirectory);
+                if (!Directory.Exists(Constants.ShameTrainChallengeDirectory))
+                {
+                    Directory.CreateDirectory(Constants.ShameTrainChallengeDirectory);
+                }
+            } catch (Exception ex)
+            {
+                string[] errors = new string[]
+                {
+                    "Trouble creating ShameTrainChallenge Directory",
+                    ex.Message
+                };
+                await LoggingService.LogMessage(LogLevel.Error, errors);
             }
-
         }
 
-        public static async Task Shame()
+        public static async Task<Dictionary<ulong, int>> UserIdsToDaysSinceLastSubmission(SocketInteractionContext Context)
         {
+            HashSet<ulong> subscribedUsers = await ShameTrainFileLoader.LoadSubscribedUsers();
+            DirectoryInfo taskDirectory = new DirectoryInfo($"{Constants.ShameTrainChallengeDirectory}");
 
+            List<DirectoryInfo> challengeFolders = new List<DirectoryInfo>(taskDirectory.GetDirectories().OrderBy(p => p.CreationTime).ToArray());
+
+            Dictionary<ulong, int> daysSinceLastSolution = new Dictionary<ulong, int>();
+            Console.WriteLine($"Number of subscribed users: {subscribedUsers.Count}");
+            foreach (ulong userId in subscribedUsers)
+            {
+                daysSinceLastSolution.Add(userId, challengeFolders.Count);
+            }
+
+            for(int i = 0; i < challengeFolders.Count; i++)
+            {
+                DirectoryInfo solutionsFolder = challengeFolders[i].GetDirectories().Where(d => d.Name.StartsWith(Constants.ShameTrainChallengeSolutionFolderName)).FirstOrDefault();
+                await CheckChallengeFolderForSolutions(solutionsFolder, daysSinceLastSolution, i);
+            }
+            return daysSinceLastSolution;
+        }
+
+        private static async Task CheckChallengeFolderForSolutions(DirectoryInfo challengeFolder, Dictionary<ulong, int> daysSinceLastSolution, int daysSince)
+        {
+            foreach (FileInfo file in challengeFolder.GetFiles())
+            {
+                ulong userIdFromFileName;
+                if (ulong.TryParse(file.Name.Split('.')[0], out userIdFromFileName))
+                {
+                    if (daysSinceLastSolution.ContainsKey(userIdFromFileName) && daysSinceLastSolution[userIdFromFileName] > daysSince) {
+                        daysSinceLastSolution[userIdFromFileName] = daysSince;
+                    }
+                } else
+                {
+                    await LoggingService.LogMessage(LogLevel.Error, $"Encountered trouble parsing userId from file solution name. ");
+                }
+            }
         }
 
         public static async Task CreateDailyChallenge(SocketInteractionContext Context, string leetcodeURL, string challengeName, string challengeId)
@@ -184,15 +225,14 @@ namespace DiscordBot.services
         {
             try
             {
-                if (File.Exists(Constants.ShameTrainSubscribedUsersFilePath))
+                HashSet<ulong> userIds = new HashSet<ulong>();
+                string[] string_userIds = File.ReadAllLines(Constants.ShameTrainSubscribedUsersFilePath);
+                foreach (string userId in string_userIds)
                 {
-                    HashSet<ulong> userIds = new HashSet<ulong>();
-                    string[] string_userIds = File.ReadAllText(Constants.ShameTrainSubscribedUsersFilePath).Split(Constants.ShameTrainSubscribedUsersFileDelimiter);
-                    foreach (string userId in string_userIds)
-                    {
-                        userIds.Add(ulong.Parse(userId));
-                    }
+                    Console.WriteLine(userId);
+                    userIds.Add(ulong.Parse(userId));
                 }
+                return userIds;
             }
             catch (Exception ex)
             {
@@ -211,7 +251,7 @@ namespace DiscordBot.services
             try
             {
                 File.Delete(Constants.ShameTrainSubscribedUsersFilePath);
-                File.WriteAllText(Constants.ShameTrainSubscribedUsersFilePath, string.Join(Constants.ShameTrainSubscribedUsersFileDelimiter, subscribedUsers));
+                File.WriteAllText(Constants.ShameTrainSubscribedUsersFilePath, string.Join("\n", subscribedUsers));
             } catch (Exception ex)
             {
                 string[] errors = new string[]
@@ -256,7 +296,9 @@ namespace DiscordBot.services
             FileInfo[] taskFiles = taskDirectory.GetFiles($"*{fileName}");
             Array.Sort(taskFiles, (a,b) => { return a.Name.CompareTo(b.Name); });
             */
-            string fullFilePath = $"{Constants.ShameTrainChallengeDirectory}{challangeId}{Constants.slash}{fileName}";
+            string fullFileDirectory = $"{Constants.ShameTrainChallengeDirectory}{challangeId}{Constants.slash}{Constants.ShameTrainChallengeSolutionDirectory}";
+            string fullFilePath = $"{fullFileDirectory}{fileName}";
+            Directory.CreateDirectory(fullFileDirectory);
             if (File.Exists(fullFilePath))
             {
                 File.Delete(fullFilePath);
@@ -269,7 +311,7 @@ namespace DiscordBot.services
         public static ChallengeDetails LoadChallengeDetails(ulong challengeId)
         {
             ChallengeDetails challengeDetails = new ChallengeDetails();
-            string challengeDirectory = Constants.ShameTrainChallengeDirectory + challengeId;
+            string challengeDirectory = Constants.ShameTrainChallengeDirectory + challengeId + Constants.ShameTrainChallengeSolutionDirectory;
             if (Directory.Exists(challengeDirectory))
             {
                 string[] lines = File.ReadAllLines(challengeDirectory + Constants.slash + Constants.ShameTrainChallengeDetailsFileName);
@@ -287,6 +329,9 @@ namespace DiscordBot.services
                         case Constants.ChallengeDate:
                             challengeDetails.ChallengeDate = parts[1];
                             break;
+                        case Constants.ChallengeVersion:
+                            challengeDetails.version = new Version(parts[1]);
+                            break;
                     }
                 }
             }
@@ -299,6 +344,7 @@ namespace DiscordBot.services
             lines.Add($"{Constants.ChallengeName}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.ChallengeName}");
             lines.Add($"{Constants.ChallengeDate}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.ChallengeDate}");
             lines.Add($"{Constants.ChallengeId}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.ChallengeId}");
+            lines.Add($"{Constants.ChallengeId}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.version.ToString()}");
             File.WriteAllLines($"{Constants.ShameTrainChallengeDirectory}{challengeId}{Constants.slash}{Constants.ShameTrainChallengeDetailsFileName}", lines.ToArray());
         }
 

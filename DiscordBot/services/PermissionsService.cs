@@ -158,6 +158,12 @@ namespace SpecterAI.services
                 _permissions.Add(JayUserId, new HashSet<Entitlement>());
             }
             _permissions[JayUserId].Add(Entitlement.CreateChallenge);
+            _permissions[JayUserId].Add(Entitlement.Shame);
+            _permissions[JayUserId].Add(Entitlement.SubscribeShameTrain);
+            _permissions[JayUserId].Add(Entitlement.GrantPermission);
+
+
+            _permissions[JonathanUserId].Add(Entitlement.SubscribeShameTrain);
         }
 
         public static string GetNameFromId(ulong user_id)
