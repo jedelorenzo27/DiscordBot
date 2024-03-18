@@ -9,6 +9,7 @@ using SpecterAI.pokemonStuff;
 using SpecterAI.services;
 using System.Net;
 using DiscordBot.services;
+using DiscordBot;
 
 public class Program
 {
@@ -28,6 +29,11 @@ public class Program
         SecretsHandler.InitializeConfiguration();
         PermissionsService.LoadPermissions();
         await ShameTrainServices.JumpStartShameTrain();
+
+        var configuration = DbConfiguration.BuildConfiguration();
+
+        // Pass the built configuration to initialize the database.
+        DbConfiguration.InitializeDatabase(configuration);
 
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,
@@ -89,8 +95,9 @@ public class Program
         LoggingService.LoadLoggingServers(_client);
 
         // Block this task until the program is closed.
-        //await Task.Delay(-1);
-        Console.ReadKey();
+        await Task.Delay(-1);
+        // Below breaks cloud deployment
+        //Console.ReadKey();
         await _client.LogoutAsync();
     }
 
