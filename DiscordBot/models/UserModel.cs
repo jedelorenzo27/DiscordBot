@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.models
 {
-    internal class Blog
+    public class UserModel
     {
-        public int BlogId { get; set; }
-        public string Name { get; set; }
+        public ulong UserId;
+        public string Name;
+        public bool Banned;
     }
 }

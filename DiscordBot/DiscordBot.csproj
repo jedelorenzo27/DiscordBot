@@ -8,13 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="database\migrations\001_CreateBlogTable.sql" />
-    <None Remove="database\migrations\002_CreatePostTable.sql" />
+    <None Remove="database\migrations\001_CreateInitalTables.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="database\migrations\001_CreateBlogTable.sql" />
-    <EmbeddedResource Include="database\migrations\002_CreatePostTable.sql" />
+    <EmbeddedResource Include="database\migrations\001_CreateInitalTables.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,6 +36,21 @@
     <Folder Include="output\pokemon_cards\" />
     <Folder Include="output\temp\" />
     <Folder Include="resources\shame_train\challenges\1218267691454828564\solutions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
