@@ -35,7 +35,6 @@ public class Program
 
         // Pass the built configuration to initialize the database.
         DbConfiguration.InitializeDatabase(configuration);
-        DbConnection g;g.
         
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,

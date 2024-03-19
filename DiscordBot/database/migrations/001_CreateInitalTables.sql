@@ -24,3 +24,9 @@ CREATE TABLE ChallengeSubmissions (
     UserId NUMERIC(20),
     SubmissionDate DATETIME
 );
+
+CREATE TABLE ChallengeSubscribers (
+    ChannelId NUMERIC(20), -- Could be Discord Server Id or Thread Id associated with a specific challenge
+    UserId NUMERIC(20),
+    SubscribeDate DATETIME
+);
