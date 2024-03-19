@@ -10,6 +10,7 @@ using SpecterAI.services;
 using System.Net;
 using DiscordBot.services;
 using DiscordBot;
+using System.Data.Common;
 
 public class Program
 {
@@ -34,7 +35,8 @@ public class Program
 
         // Pass the built configuration to initialize the database.
         DbConfiguration.InitializeDatabase(configuration);
-
+        DbConnection g;g.
+        
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,
         // like messages, new members, etc.

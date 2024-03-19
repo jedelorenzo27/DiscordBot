@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,13 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="database\migrations\001_CreateBlogTable.sql" />
-    <None Remove="database\migrations\002_CreatePostTable.sql" />
+    <None Remove="database\migrations\001_CreateInitalTables.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="database\migrations\001_CreateBlogTable.sql" />
-    <EmbeddedResource Include="database\migrations\002_CreatePostTable.sql" />
+    <EmbeddedResource Include="database\migrations\001_CreateInitalTables.sql" />
   </ItemGroup>
 
   <ItemGroup>
