@@ -9,11 +9,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot
+namespace BotDataAccess
 {
-    internal class DbConfiguration
+    public class DbConfiguration
     {
-
         public static IConfiguration BuildConfiguration()
         {
 
@@ -34,7 +33,7 @@ namespace DiscordBot
             {
                 return configuration.GetConnectionString("DefaultConnection");
             }
-            else 
+            else
             {
                 var keyVaultBaseUrl = configuration["AzureKeyVault:BaseUrl"];
                 var secretName = "DbConnString";
@@ -42,7 +41,7 @@ namespace DiscordBot
                 var client = new SecretClient(new Uri(keyVaultBaseUrl), new DefaultAzureCredential());
                 var secret = client.GetSecret(secretName);
 
-                return secret.Value.Value; 
+                return secret.Value.Value;
             }
         }
 
@@ -54,12 +53,12 @@ namespace DiscordBot
             Console.WriteLine("Database connection string retrieved successfully.");
 
             var upgrader = DeployChanges.To
-                .SqlDatabase(connectionString) 
+                .SqlDatabase(connectionString)
                 .WithScriptsEmbeddedInAssembly(
-                    Assembly.GetExecutingAssembly(), 
-                    script => script.EndsWith(".sql")) 
-                .LogToConsole() 
-                .Build(); 
+                    Assembly.GetExecutingAssembly(),
+                    script => script.EndsWith(".sql"))
+                .LogToConsole()
+                .Build();
 
             var result = upgrader.PerformUpgrade();
 
@@ -71,6 +70,5 @@ namespace DiscordBot
 
             Console.WriteLine("Database updated successfully.");
         }
-
     }
 }

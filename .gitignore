@@ -371,3 +371,7 @@ FodyWeavers.xsd
 /DiscordBot/resources/shame_train
 /DiscordBot/shame_train
 /DiscordBot/appsettings.Development.json
+/BotUnitTests/Properties/launchSettings.json
+/BotShared/Properties/launchSettings.json
+/DiscordBot.sln
+/BotDataAccess/Properties/launchSettings.json

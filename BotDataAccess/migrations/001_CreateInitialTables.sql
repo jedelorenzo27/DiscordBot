@@ -9,14 +9,14 @@ CREATE TABLE Entitlements (
     UserId NUMERIC(20),
     Entitlment NVARCHAR(20),
     Granted DATETIME
-)
+);
 
 CREATE TABLE Challenges (
     ChannelId NUMERIC(20), -- Same as thread id, all challenges are associated with a thread
     ServerId NUMERIC(20), -- discord server id
     CreationDate DATETIME,
     LeetcodeId NUMERIC(5), 
-    LeetcodeName NVARCHAR(20),
+    LeetcodeName NVARCHAR(20)
 );
 
 CREATE TABLE ChallengeSubmissions (
