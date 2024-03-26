@@ -14,6 +14,7 @@ using System.Data.Common;
 using BotDataAccess;
 using Microsoft.Data.SqlClient;
 using BotDataAccess.repositories;
+using DiscordBot.Utilities;
 
 public class Program
 {
@@ -102,6 +103,8 @@ public class Program
 
         // Prepare logging service. Any logs sent before here will be printed to console but not sent to discord.
         LoggingService.LoadLoggingServers(_client);
+
+        await LoggingService.LogMessage(LogLevel.Info, $"Starting bot with version: {Constants.BotVersion}"); ;
 
         // Block this task until the program is closed.
         await Task.Delay(-1);

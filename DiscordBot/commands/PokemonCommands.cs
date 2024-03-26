@@ -10,6 +10,7 @@ using SpecterAI.services;
 using System.Diagnostics;
 using SpecterAI.Utilities;
 using DiscordBot.Utilities;
+using BotShared.models;
 
 namespace SpecterAI.commands
 {
