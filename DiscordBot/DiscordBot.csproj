@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,14 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="database\migrations\001_CreateInitalTables.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="database\migrations\001_CreateInitalTables.sql" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.10.4" />
@@ -36,6 +28,11 @@
     <Folder Include="output\pokemon_cards\" />
     <Folder Include="output\temp\" />
     <Folder Include="resources\shame_train\challenges\1218267691454828564\solutions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BotDataAccess\BotDataAccess.csproj" />
+    <ProjectReference Include="..\BotShared\BotShared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

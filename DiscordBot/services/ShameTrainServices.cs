@@ -4,6 +4,7 @@ using SpecterAI.services;
 using DiscordBot.Utilities;
 using SpecterAI.Utilities;
 using Version = DiscordBot.Utilities.Version;
+using BotShared.models;
 
 namespace DiscordBot.services
 {

@@ -1,4 +1,5 @@
-﻿using Discord.Interactions;
+﻿using BotShared.models;
+using Discord.Interactions;
 using SpecterAI.services;
 using SpecterAI.Utilities;
 using System;

@@ -11,6 +11,9 @@ using System.Net;
 using DiscordBot.services;
 using DiscordBot;
 using System.Data.Common;
+using BotDataAccess;
+using Microsoft.Data.SqlClient;
+using BotDataAccess.repositories;
 
 public class Program
 {
@@ -32,9 +35,14 @@ public class Program
         await ShameTrainServices.JumpStartShameTrain();
 
         var configuration = DbConfiguration.BuildConfiguration();
+        DbConfiguration.InitializeDatabase(configuration); // Pass the built configuration to initialize the database.
 
-        // Pass the built configuration to initialize the database.
-        DbConfiguration.InitializeDatabase(configuration);
+        var connectionString = DbConfiguration.GetDatabaseConnectionString(configuration);
+        var dbConnection = new SqlConnection(connectionString);
+
+        var challangeRepo = new ChallengeRepo(connectionString);
+
+
         
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,

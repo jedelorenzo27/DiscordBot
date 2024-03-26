@@ -1,4 +1,5 @@
-﻿using SpecterAI.services;
+﻿using BotShared.models;
+using SpecterAI.services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
