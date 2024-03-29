@@ -29,7 +29,7 @@ namespace SpecterAI.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.ViewPermissions);
 
-            Entitlement[] entitlements = PermissionsService.GetUserEntitlements(user_id);
+            Entitlement[] entitlements = await PermissionsService.GetUserEntitlements(user_id);
             string response = "";
             if (entitlements.Length > 0)
             {

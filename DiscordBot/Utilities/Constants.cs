@@ -35,6 +35,10 @@ namespace DiscordBot.Utilities
         public static string DebugChannelsFile = $"{ResourceDirectory}logging{slash}debug_channels.txt";
 
         // Permission:
+        public static string DevLogsChannelId = "1103512627675672608";
+        public static string JayUserId = "222127402980081667";
+        public static string JonathanUserId = "429310221861519374";
+        public static string ChrisUserId = "447113923162800148";
         public static string BasePermissionPath = $"{ResourceDirectory}permissions{slash}";
         public static string PermissionsFileName = $"permissions.txt";
         public static string PermissionsFilePath = $"{BasePermissionPath}{PermissionsFileName}";

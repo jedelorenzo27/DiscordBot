@@ -23,6 +23,11 @@ public class Program
     private InteractionService _interactions;
     private IServiceProvider _services;
     public static HttpClient _httpClient;
+
+
+    public static ChallengeRepo _challengeRepo;
+    public static EntitlementRepo _entitlementRepo;
+
     public static async Task Main(string[] args) => await new Program().MainAsync();
 
     public async Task MainAsync()
@@ -40,8 +45,8 @@ public class Program
 
         var connectionString = DbConfiguration.GetDatabaseConnectionString(configuration);
         var dbConnection = new SqlConnection(connectionString);
-
-        var challangeRepo = new ChallengeRepo(connectionString);
+        _challengeRepo = new ChallengeRepo(connectionString);
+        _entitlementRepo = new EntitlementRepo(connectionString);
 
 
         
