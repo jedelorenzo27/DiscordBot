@@ -96,27 +96,7 @@ namespace SpecterAI.services
 
         public static void LoadLoggingServers (DiscordSocketClient client)
         {
-            try
-            {
-                if (File.Exists(Constants.DebugChannelsFile))
-                {
-                    string[] lines = File.ReadAllLines(Constants.DebugChannelsFile);
-                    foreach (string line in lines)
-                    {
-                        if (!line.StartsWith("#")) {
-                            string[] split = line.Split(debug_channels_delimiter);
-                            string channel_id = split[0].Trim();
-                            _debugChannels.Add(channel_id);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Something seriously bingo bongo'd while loading discord-logging-servers");
-                Console.WriteLine(ex.Message);
-            }
-
+            _debugChannels.Add(Constants.DevLogsChannelId);
             _discord = client;
             _ready = true;
         }
