@@ -37,8 +37,6 @@ public class Program
         handler.UseProxy = false;
         _httpClient = new HttpClient(handler);
         SecretsHandler.InitializeConfiguration();
-        PermissionsService.LoadPermissions();
-        await ShameTrainServices.JumpStartShameTrain();
 
         var configuration = DbConfiguration.BuildConfiguration();
         DbConfiguration.InitializeDatabase(configuration); // Pass the built configuration to initialize the database.
@@ -48,8 +46,10 @@ public class Program
         _challengeRepo = new ChallengeRepo(connectionString);
         _entitlementRepo = new EntitlementRepo(connectionString);
 
+        await PermissionsService.LoadPermissions();
+        await ShameTrainServices.JumpStartShameTrain();
 
-        
+
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,
         // like messages, new members, etc.
