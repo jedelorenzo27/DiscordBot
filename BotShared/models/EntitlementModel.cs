@@ -9,8 +9,6 @@ namespace BotShared.models
 {
     public enum Entitlement
     {
-        [Description("All")]
-        All,
         [Description("Grant Permission")]
         GrantPermission,
         [Description("Remove Permission")]

@@ -63,7 +63,6 @@ namespace SpecterAI.commands
 
         [SlashCommand("permissions-grant", "Grants a user or server a permission")]
         public async Task GrantPermission(string id,
-            [Choice("All", "All")]
             [Choice("GrantPermission", "GrantPermission")]
             [Choice("RemovePermission", "RemovePermission")]
             [Choice("ViewPermissions", "ViewPermissions")]
@@ -83,9 +82,9 @@ namespace SpecterAI.commands
             string permission)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.GrantPermission);
-            Entitlement result;
 
-            if (Enum.TryParse<Entitlement>(permission, out result))
+            Entitlement result;
+            if (Enum.TryParse(permission, out result))
             {
                 await PermissionsService.GrantPermission(Context, id, result);
                 await RespondAsync("Done");
