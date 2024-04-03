@@ -94,7 +94,6 @@ namespace SpecterAI.services
         {
             //TODO: setup banned users
             _bannedUsers = new HashSet<string>();
-
             await Program._entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.GrantPermission);
             await Program._entitlementRepo.AddEntitlement(Constants.JonathanUserId, Entitlement.GrantPermission);
         }
@@ -139,11 +138,11 @@ namespace SpecterAI.services
 
         public static async Task<Entitlement[]> GetUserEntitlements(string id)
         {
-            EntitlementModel[] entitlementModels = await Program._entitlementRepo.GetEntitlementsById(id);
+            List< EntitlementModel> entitlementModels = await Program._entitlementRepo.GetEntitlementsById(id);
             if (entitlementModels != null)
             {
-                Entitlement[] permissions = new Entitlement[entitlementModels.Length];
-                for(int i  = 0; i < entitlementModels.Length; i++)
+                Entitlement[] permissions = new Entitlement[entitlementModels.Count];
+                for(int i  = 0; i < entitlementModels.Count; i++)
                 {
                     permissions[i] = entitlementModels[i].Entitlement;
                 }
@@ -182,7 +181,7 @@ namespace SpecterAI.services
                 throw new BannedException();
             }
 
-            if (Program._entitlementRepo.GetEntitlementsByIds(new ulong[] { context.Guild.Id, context.Channel.Id, context.User.Id }, entitlement) != null)
+            if (await Program._entitlementRepo.GetEntitlementsByIds(new string[] { context.Guild.Id.ToString(), context.Channel.Id.ToString(), context.User.Id.ToString() }, entitlement) != null)
             {
                 return true;
             }

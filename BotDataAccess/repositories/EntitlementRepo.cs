@@ -19,99 +19,51 @@ namespace BotDataAccess.repositories
             _db = new SqlConnection(connectionString);
         }
 
-
-
-
-        public async Task<EntitlementModel[]> GetEntitlementsById(string id) // could be User/Server/Channel/Thread Id
+        public async Task<List<EntitlementModel>> GetEntitlementsById(string id) 
         {
-            ulong longId;
-            if (ulong.TryParse(id, out longId))
-            {
-                return await GetEntitlementsById(longId);
-            }
-            return null;
-        }
-        public async Task<EntitlementModel[]> GetEntitlementsById(ulong id) // could be User/Server/Channel/Thread Id
-        {
-            var sql = "SELECT * FROM Entitlements WHERE Id = @Id;";
-            return await _db.QuerySingleOrDefaultAsync<EntitlementModel[]>(sql, new { Id = id });
+            var sql = $"SELECT * FROM Entitlements WHERE Id = {id};";
+            SqlMapper.GridReader results = await _db.QueryMultipleAsync(sql);
+            return (await results.ReadAsync<EntitlementModel>()).ToList();
         }
 
-
-        public async Task<EntitlementModel[]> GetEntitlementsByIds(ulong[] ids, Entitlement entitlement) // could be User/Server/Channel/Thread Id
+        public async Task<List<EntitlementModel>> GetEntitlementsByIds(string[] ids, Entitlement entitlement)
         {
             List<string> idWhereConditions = new List<string>();
-            foreach(ulong id in ids)
+            foreach(string id in ids)
             {
                 idWhereConditions.Add($"Id = {id}");
             }
 
-            var sql = $"SELECT * FROM Entitlements WHERE ({string.Join(" OR ", idWhereConditions)}) AND Entitlment = @Entitlment;";
-            return await _db.QuerySingleOrDefaultAsync<EntitlementModel[]>(sql, new { Entitlment = entitlement });
+            var sql = $"SELECT * FROM Entitlements WHERE Entitlement = {entitlement} AND ({string.Join(" OR ", idWhereConditions)});";
+            SqlMapper.GridReader results = await _db.QueryMultipleAsync(sql);
+            return (await results.ReadAsync<EntitlementModel>()).ToList();
         }
 
-
-        public async Task<EntitlementModel> GetEntitlementsById(string id, Entitlement entitlement)
+        public async Task<EntitlementModel> GetEntitlementById(string id, Entitlement entitlement)
         {
-            ulong longId;
-            if (ulong.TryParse(id, out longId))
-            {
-                return await GetEntitlementsById(longId, entitlement);
-            }
-            return null;
+            var sql = $"SELECT * FROM Entitlements WHERE Id = '{id}' AND Entitlement = '{entitlement}';";
+            return await _db.QueryFirstOrDefaultAsync<EntitlementModel>(sql);
         }
-        public async Task<EntitlementModel> GetEntitlementsById(ulong id, Entitlement entitlement)
-        {
-            var sql = "SELECT * FROM Entitlements WHERE Id = @Id AND Entitlment = @Entitlment;";
-            return await _db.QuerySingleOrDefaultAsync<EntitlementModel>(sql, new { Id = id , Entitlment = entitlement });
-        }
-
 
         public async Task AddEntitlement(string id, Entitlement entitlement)
         {
-            ulong longId;
-            if (ulong.TryParse(id, out longId)) {
-                await AddEntitlement(longId, entitlement);
-            }
-        }
-        public async Task AddEntitlement(ulong id, Entitlement entitlement)
-        {
-            if (await GetEntitlementsById(id, entitlement) == null)
+            if (await GetEntitlementById(id, entitlement) != null)
             {
-                var sql = "INSERT INTO Entitlements (@Id, @Entitlment, @CreationDate);";
-                await _db.QuerySingleOrDefaultAsync<EntitlementModel>(sql, new { Id = id, Entitlment = entitlement, CreationDate = DateTime.Now });
+                var sql = $"INSERT INTO Entitlements VALUES ('{id}', '{entitlement}', '{DateTime.Now}');";
+                await _db.QueryAsync(sql);
             }
         }
-
 
         public async Task RemoveEntitlement(string id, Entitlement entitlement)
         {
-            ulong longId;
-            if (ulong.TryParse(id, out longId))
-            {
-                await RemoveEntitlement(longId, entitlement);
-            }
+            var sql = $"DELETE FROM Entitlements WHERE Id = {id} AND Entitlment = {entitlement};";
+            await _db.QuerySingleOrDefaultAsync<EntitlementModel>(sql);
         }
-        public async Task RemoveEntitlement(ulong id, Entitlement entitlement)
-        {
-            var sql = "DELETE FROM Entitlements WHERE Id = @Id AND Entitlment = @Entitlment;";
-            await _db.QuerySingleOrDefaultAsync<EntitlementModel>(sql, new { Id = id, Entitlment = entitlement });
-        }
-
 
         public async Task RemoveAllEntitlements(string id)
         {
-            ulong longId;
-            if (ulong.TryParse(id, out longId))
-            {
-                await RemoveAllEntitlements(longId);
-            }
-        }
-        public async Task RemoveAllEntitlements(ulong id)
-        {
-            var sql = "DELETE FROM Entitlements WHERE Id = @Id;";
+            var sql = $"DELETE FROM Entitlements WHERE Id = {id};";
             await _db.QuerySingleOrDefaultAsync<EntitlementModel>(sql, new { Id = id });
         }
-
     }
 }

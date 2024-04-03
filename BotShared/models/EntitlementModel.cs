@@ -47,8 +47,14 @@ namespace BotShared.models
 
     public class EntitlementModel
     {
-        public ulong UserId { get; set; }
+        public string UserId { get; set; }
         public Entitlement Entitlement { get; set; }
         public DateTime Granted { get; set; }
+
+        override
+        public string ToString()
+        {
+            return $"userId:{UserId},Entitlement:{Entitlement},Granted:{Granted}";
+        }
     }
 }

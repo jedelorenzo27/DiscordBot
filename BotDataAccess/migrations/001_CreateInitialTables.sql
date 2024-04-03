@@ -1,5 +1,5 @@
 CREATE TABLE Users (
-    UserId NUMERIC(20) PRIMARY KEY,
+    UserId NVARCHAR(20) PRIMARY KEY,
     UserType NVARCHAR(20), 
     UserName NVARCHAR(20),
     Banned BIT
@@ -7,27 +7,27 @@ CREATE TABLE Users (
 
 -- Permissions table ('Permissions' is a sql keyword) 
 CREATE TABLE Entitlements (
-    Id NUMERIC(20),
-    Entitlment NVARCHAR(20),
+    Id NVARCHAR(20),
+    Entitlement NVARCHAR(20),
     Granted DATETIME
 );
 
 CREATE TABLE Challenges (
-    ChannelId NUMERIC(20), -- Same as thread id, all challenges are associated with a thread
-    ServerId NUMERIC(20), -- discord server id
+    ChannelId NVARCHAR(20), -- Same as thread id, all challenges are associated with a thread
+    ServerId NVARCHAR(20), -- discord server id
     CreationDate DATETIME,
     LeetcodeNumber NUMERIC(5), 
     LeetcodeName NVARCHAR(20)
 );
 
 CREATE TABLE ChallengeSubmissions (
-    ChannelId NUMERIC(20),
-    UserId NUMERIC(20),
+    ChannelId NVARCHAR(20),
+    UserId NVARCHAR(20),
     SubmissionDate DATETIME
 );
 
 CREATE TABLE ChallengeSubscribers (
-    ChannelId NUMERIC(20), -- Could be Discord Server Id or Thread Id associated with a specific challenge
-    UserId NUMERIC(20),
+    ChannelId NVARCHAR(20), -- Could be Discord Server Id or Thread Id associated with a specific challenge
+    UserId NVARCHAR(20),
     SubscribeDate DATETIME
 );
