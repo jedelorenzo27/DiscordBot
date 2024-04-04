@@ -70,8 +70,9 @@ namespace SpecterAI.commands
             [Choice("ViewChallengeSubmissions", "ViewChallengeSubmissions")]
             string permission)
         {
+            Console.WriteLine("Granting permission");
             await PermissionsService.ValidatePermissions(Context, Entitlement.GrantPermission);
-
+            Console.WriteLine("Passed permission check");
             Entitlement result;
             if (Enum.TryParse(permission, out result))
             {

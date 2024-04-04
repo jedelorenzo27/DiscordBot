@@ -71,7 +71,8 @@ namespace DiscordBot.commands
             await DeferAsync();
             await LoggingService.LogCommandUse(Context, "create-challenge");
             await ShameTrainServices.CreateDailyChallenge(Context, leetcodeURL, challengeName, int.Parse(challengeId));
-            await RespondAsync(text: $"Created thread");
+            //await RespondAsync(text: $"Good luck, ya'll!");
+            //await FollowupAsync("Good luck!");
             await DeleteOriginalResponseAsync();
         }
 

@@ -47,8 +47,8 @@ namespace DiscordBot.services
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubmitChallenge);
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.VerifySubmission);
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.ViewChallengeSubmissions);
-            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubscribeShameTrain);
-            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.UnsubscribeShameTrain);
+            //await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubscribeShameTrain);
+            //await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.UnsubscribeShameTrain);
 
             // Store challenge details in db
             ChallengeModel challenge = new ChallengeModel()
@@ -79,6 +79,7 @@ namespace DiscordBot.services
 
         public static async Task<string[]> SubmitSolution(SocketInteractionContext Context, Attachment solution, string language, string timeComplexity, ulong challengeId, ulong userId)
         {
+            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.SubscribeShameTrain);
             await ShameTrainFileLoader.SaveSolution(solution, language, challengeId, userId);
             return await ShameTrainFileLoader.LoadSolution(language, challengeId, userId);
         }

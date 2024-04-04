@@ -22,14 +22,14 @@ namespace BotDataAccess.repositories
 
         public async Task<List<ChallengeModel>> GetChallengeByChannelId(int channelId)
         {
-            var sql = $"SELECT * FROM Challenges WHERE ChannelId = {channelId};";
+            var sql = $"SELECT * FROM Challenges WHERE ChannelId = '{channelId}';";
             SqlMapper.GridReader results = await _db.QueryMultipleAsync(sql);
             return (await results.ReadAsync<ChallengeModel>()).ToList();
         }
 
         public async Task<List<ChallengeModel>> GetChallengeByIdAsync(int challengeId)
         {
-            var sql = $"SELECT * FROM Challenges WHERE ChallengeId = {challengeId};";
+            var sql = $"SELECT * FROM Challenges WHERE ChallengeId = '{challengeId}';";
             SqlMapper.GridReader results = await _db.QueryMultipleAsync(sql);
             return (await results.ReadAsync<ChallengeModel>()).ToList();
         }

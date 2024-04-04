@@ -21,7 +21,7 @@ namespace BotDataAccess.repositories
 
         public async Task<List<ChallengeSubscriberModel>> GetSubscribersForChannel(string channelId)
         {
-            var sql = $"SELECT * FROM ChallengeSubscribers WHERE ChannelId = {channelId};";
+            var sql = $"SELECT * FROM ChallengeSubscribers WHERE ChannelId = '{channelId}';";
             SqlMapper.GridReader results = await _db.QueryMultipleAsync(sql);
             return (await results.ReadAsync<ChallengeSubscriberModel>()).ToList();
         }
@@ -44,7 +44,7 @@ namespace BotDataAccess.repositories
 
         public async Task<int> RemoveSubscriber(string channelId, string userId)
         {
-            var sql = $"DELETE FROM ChallengeSubscribers WHERE ChannelId = {channelId} AND UserId = {userId};";
+            var sql = $"DELETE FROM ChallengeSubscribers WHERE ChannelId = '{channelId}' AND UserId = '{userId}';";
             return await _db.ExecuteAsync(sql);
         }
     }

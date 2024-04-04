@@ -8,7 +8,7 @@ CREATE TABLE Users (
 -- Permissions table ('Permissions' is a sql keyword) 
 CREATE TABLE Entitlements (
     Id NVARCHAR(20),
-    Entitlement NVARCHAR(20),
+    Entitlement NVARCHAR(50),
     Granted DATETIME
 );
 
@@ -18,7 +18,8 @@ CREATE TABLE Challenges (
     ServerId NVARCHAR(20), -- discord server id
     CreationDate DATETIME,
     LeetcodeName NVARCHAR(60),
-    LeetcodeNumber NUMERIC(5) 
+    LeetcodeNumber NUMERIC(5),
+    ChallengeDifficulty NVARCHAR(10),
 );
 
 CREATE TABLE ChallengeSubmissions (

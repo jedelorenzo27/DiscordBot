@@ -9,6 +9,7 @@ namespace BotShared.models
 {
     public enum Entitlement
     {
+        // Currently limited to length of 50 characters
         [Description("Grant Permission")]
         GrantPermission,
         [Description("Remove Permission")]

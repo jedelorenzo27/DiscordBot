@@ -54,9 +54,14 @@ public class Program
         await PermissionsService.LoadPermissions();
 
         string devChannel = "1103512627675672608";
+
         await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JayUserId, DateTime.Now);
-        await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JonathanUserId, DateTime.Now);
-        await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.ChrisUserId, DateTime.Now);
+        //await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JonathanUserId, DateTime.Now);
+        //await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.ChrisUserId, DateTime.Now);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.GrantPermission);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.CreateChallenge);
+        await _entitlementRepo.AddEntitlement(Constants.JonathanUserId, Entitlement.GrantPermission);
+
         List<ChallengeSubscriberModel> models = await _challengeSubscriberRepo.GetSubscribersForChannel(devChannel);
         Console.WriteLine($"Total Subscribed: {models.Count}");
         foreach(ChallengeSubscriberModel model in models)
