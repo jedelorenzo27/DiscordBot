@@ -30,6 +30,7 @@ public class Program
     public static ChallengeSubmissionRepo _challengeSubmissionRepo;
     public static ChallengeSubscriberRepo _challengeSubscriberRepo;
     public static EntitlementRepo _entitlementRepo;
+    public static UsageStatsRepo _usageStatsRepo;
 
     public static async Task Main(string[] args) => await new Program().MainAsync();
 
@@ -43,21 +44,20 @@ public class Program
 
         var configuration = DbConfiguration.BuildConfiguration();
         DbConfiguration.InitializeDatabase(configuration); // Pass the built configuration to initialize the database.
-        //Console.ReadKey();
+
         var connectionString = DbConfiguration.GetDatabaseConnectionString(configuration);
         var dbConnection = new SqlConnection(connectionString);
         _challengeRepo = new ChallengeRepo(connectionString);
         _challengeSubmissionRepo = new ChallengeSubmissionRepo(connectionString);
         _challengeSubscriberRepo = new ChallengeSubscriberRepo(connectionString);
         _entitlementRepo = new EntitlementRepo(connectionString);
+        _usageStatsRepo = new UsageStatsRepo(connectionString);
 
         await PermissionsService.LoadPermissions();
 
         string devChannel = "1103512627675672608";
 
         await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JayUserId, DateTime.Now);
-        //await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JonathanUserId, DateTime.Now);
-        //await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.ChrisUserId, DateTime.Now);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.GrantPermission);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.CreateChallenge);
         await _entitlementRepo.AddEntitlement(Constants.JonathanUserId, Entitlement.GrantPermission);

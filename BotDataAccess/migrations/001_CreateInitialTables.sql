@@ -5,6 +5,12 @@ CREATE TABLE Users (
     Banned BIT
 );
 
+CREATE TABLE UsageStats (
+    Id NVARCHAR(20),
+    StatType NVARCHAR(50),
+    TimesUsed NUMERIC(10),
+);
+
 -- Permissions table ('Permissions' is a sql keyword) 
 CREATE TABLE Entitlements (
     Id NVARCHAR(20),

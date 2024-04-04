@@ -71,8 +71,6 @@ namespace DiscordBot.commands
             await DeferAsync();
             await LoggingService.LogCommandUse(Context, "create-challenge");
             await ShameTrainServices.CreateDailyChallenge(Context, leetcodeURL, challengeName, int.Parse(challengeId));
-            //await RespondAsync(text: $"Good luck, ya'll!");
-            //await FollowupAsync("Good luck!");
             await DeleteOriginalResponseAsync();
         }
 
@@ -81,8 +79,8 @@ namespace DiscordBot.commands
             [Choice("solution", "Upload")
             ] Attachment solution,
 
-            [Choice("CSharp", "cs"), 
-            Choice("Javasript", "js"), 
+            [Choice("CSharp", "cs"),
+            Choice("Javasript", "js"),
             Choice("Python", "py")
             ] string language,
 
@@ -100,9 +98,11 @@ namespace DiscordBot.commands
             await LoggingService.LogCommandUse(Context, "submit-challenge");
             string[] solutionLines = await ShameTrainServices.SubmitSolution(Context, solution, language, timeComplexity, Context.Channel.Id, Context.User.Id);
 
-            List<string> responseLines = new List<string>();
-            responseLines.Add($"Thanks for the submission, ${PermissionsService.GetNameFromId(Context.User.Id)}! You're probably safe from the Shame Train... for now. You can verify submission via /verify-submission ");
-            responseLines.Add("||```");
+            List<string> responseLines = new List<string>
+            {
+                $"Thanks for the submission, ${PermissionsService.GetNameFromId(Context.User.Id)}! You're probably safe from the Shame Train... for now. You can verify submission via /verify-submission ",
+                "||```"
+            };
             foreach(string line in solutionLines)
             {
                 string sanitizedLine = line.Replace("||", "OR");
@@ -115,7 +115,7 @@ namespace DiscordBot.commands
             await ModifyOriginalResponseAsync(action);
         }
 
-        [SlashCommand("verify-submission", "Verify your submission was recorded")]
+        /*[SlashCommand("verify-submission", "Verify your submission was recorded")]
         public async Task VerifySubmission()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.VerifySubmission);
@@ -127,7 +127,7 @@ namespace DiscordBot.commands
             {
                 await RespondAsync("We have no record of you ever submitting a solution for this challenge. ");
             }
-        }
+        }*/
 
         [SlashCommand("subscribe", "subscribe to shame-train challenges")]
         public async Task Subscribe()
@@ -152,13 +152,13 @@ namespace DiscordBot.commands
             await RespondAsync($"Missing messages of shame. You're off the hook this time, {Context.User.Username}. Now get out of here you little scamp!");
         }
 
-        [SlashCommand("view-submissions", "View submissions for a given thread")]
+        /*[SlashCommand("view-submissions", "View submissions for a given thread")]
         public async Task ViewSubmissions()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.ViewChallengeSubmissions);
             await LoggingService.LogCommandUse(Context, "submissions");
 
-        }
+        }*/
 
     }
 }

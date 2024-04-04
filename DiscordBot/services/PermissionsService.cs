@@ -159,33 +159,23 @@ namespace SpecterAI.services
             return null;
         }
 
-        private static async Task recordPermissionCheck(string id, string name, Entitlement entitlement)
-        {
-            if (!_userMetadata.ContainsKey(id)) 
-            {
-                _userMetadata.Add(id, new UserMetadata(name, id));
-            }
-            _userMetadata[id].IncrementEntitlementCount(entitlement);
-        }
-
         public static async Task<bool> ValidatePermissions(SocketInteractionContext context, Entitlement entitlement)
         {
-            //await recordPermissionCheck(context.User.Id.ToString(), context.User.Username, entitlement);
-            //await recordPermissionCheck(context.Channel.Id.ToString(), context.Channel.Name, entitlement);
-            //await recordPermissionCheck(context.Guild.Id.ToString(), context.Guild.Name, entitlement);
+
+            await Program._usageStatsRepo.IncrementStat(context.User.Id.ToString(), entitlement.ToString(), StatTypeSuffix.Success);
+            await Program._usageStatsRepo.IncrementStat(context.Channel.Id.ToString(), entitlement.ToString(), StatTypeSuffix.Success);
+            await Program._usageStatsRepo.IncrementStat(context.Guild.Id.ToString(), entitlement.ToString(), StatTypeSuffix.Success);
 
             /*if (_bannedUsers.Contains(context.User.Id.ToString())) {
                 await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}' due to being banned.");
                 await context.Interaction.RespondAsync(GetDeniedMessageForBannedUser(context.User.Id.ToString()));
                 throw new BannedException();
             }*/
-            Console.WriteLine("ok hello?");
             List<EntitlementModel> entitlements = await Program._entitlementRepo.GetEntitlementsByIds(new string[] { context.Guild.Id.ToString(), context.Channel.Id.ToString(), context.User.Id.ToString() }, entitlement);
             if (entitlements != null && entitlements.Count > 0)
             {
                 return true;
             }
-            Console.WriteLine("failed check?");
 
             await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}'");
             await context.Interaction.RespondAsync(GetDeniedMessageForUnauthrorizedUser(context.User.Id.ToString()));

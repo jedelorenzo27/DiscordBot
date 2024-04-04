@@ -11,7 +11,8 @@ namespace BotShared.models
         User,
         Server,
         Channel,
-        Thread
+        Thread,
+        Unknown
     }
 
     public class UserModel
