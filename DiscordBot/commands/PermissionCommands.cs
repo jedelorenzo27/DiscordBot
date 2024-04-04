@@ -1,4 +1,5 @@
 ﻿using BotShared.models;
+using Discord.Commands;
 using Discord.Interactions;
 using SpecterAI.services;
 using SpecterAI.Utilities;
@@ -12,18 +13,6 @@ namespace SpecterAI.commands
 {
     public class PermissionCommands : InteractionModuleBase<SocketInteractionContext>
     {
-        [SlashCommand("permissions-list", "View available permissions")]
-        public async Task ListPermissions()
-        {
-            string response = "Available Permissions: ";
-            List<Entitlement> entitlements = Enum.GetValues(typeof(Entitlement)).Cast<Entitlement>().ToList();
-            foreach (Entitlement entitlement in entitlements)
-            {
-                response += "\n" + EnumExtensions.ToDescriptionString(entitlement);
-            }
-            await RespondAsync(response);
-        }
-
         [SlashCommand("permissions-view", "Returns a user's granted permissions")]
         public async Task ViewPermissions(string user_id)
         {
@@ -94,6 +83,17 @@ namespace SpecterAI.commands
             }
         }
 
+        //TODO: wildly inefficient - write a method for bulk adds
+        [SlashCommand("permissions-grant-all", "Grants a user or server a permission")]
+        public async Task GrantAllPermissions(string id)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.GrantPermission);
+            foreach (Entitlement entitlement in Enum.GetValues(typeof(Entitlement)).Cast<Entitlement>())
+            {
+                await PermissionsService.GrantPermission(Context, id, entitlement);
+            }
+        }
+
         [SlashCommand("permissions-revoke", "Revokes a users permissions")]
         public async Task RevokePermission(string id, string permission)
         {
@@ -108,6 +108,17 @@ namespace SpecterAI.commands
             else
             {
                 await RespondAsync(permission + " is not a valid permission");
+            }
+        }
+
+        //TODO: wildly inefficient - write a method for bulk deletes
+        [SlashCommand("permissions-revoke-all", "Grants a user or server a permission")]
+        public async Task RevokeAllPermissions(string id)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.GrantPermission);
+            foreach (Entitlement entitlement in Enum.GetValues(typeof(Entitlement)).Cast<Entitlement>())
+            {
+                await PermissionsService.RemovePermission(Context, id, entitlement);
             }
         }
 

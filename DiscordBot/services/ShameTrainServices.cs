@@ -18,88 +18,30 @@ namespace DiscordBot.services
 
     public static class ShameTrainServices
     {
-        public static async Task JumpStartShameTrain()
-        {
-            try
-            {
-                if (!Directory.Exists(Constants.ShameTrainChallengeDirectory))
-                {
-                    Directory.CreateDirectory(Constants.ShameTrainChallengeDirectory);
-                }
-            } catch (Exception ex)
-            {
-                string[] errors = new string[]
-                {
-                    "Trouble creating ShameTrainChallenge Directory",
-                    ex.Message
-                };
-                await LoggingService.LogMessage(LogLevel.Error, errors);
-            }
-        }
-
-        public static async Task<Dictionary<ulong, int>> UserIdsToDaysSinceLastSubmission(SocketInteractionContext Context)
-        {
-            HashSet<ulong> subscribedUsers = await ShameTrainFileLoader.LoadSubscribedUsers();
-            DirectoryInfo taskDirectory = new DirectoryInfo($"{Constants.ShameTrainChallengeDirectory}");
-
-            List<DirectoryInfo> challengeFolders = new List<DirectoryInfo>(taskDirectory.GetDirectories().OrderBy(p => p.CreationTime).ToArray());
-
-            Dictionary<ulong, int> daysSinceLastSolution = new Dictionary<ulong, int>();
-            Console.WriteLine($"Number of subscribed users: {subscribedUsers.Count}");
-            foreach (ulong userId in subscribedUsers)
-            {
-                daysSinceLastSolution.Add(userId, challengeFolders.Count);
-            }
-
-            for(int i = 0; i < challengeFolders.Count; i++)
-            {
-                DirectoryInfo solutionsFolder = challengeFolders[i].GetDirectories().Where(d => d.Name.StartsWith(Constants.ShameTrainChallengeSolutionFolderName)).FirstOrDefault();
-                await CheckChallengeFolderForSolutions(solutionsFolder, daysSinceLastSolution, i);
-            }
-            return daysSinceLastSolution;
-        }
-
-        private static async Task CheckChallengeFolderForSolutions(DirectoryInfo challengeFolder, Dictionary<ulong, int> daysSinceLastSolution, int daysSince)
-        {
-            foreach (FileInfo file in challengeFolder.GetFiles())
-            {
-                ulong userIdFromFileName;
-                if (ulong.TryParse(file.Name.Split('.')[0], out userIdFromFileName))
-                {
-                    if (daysSinceLastSolution.ContainsKey(userIdFromFileName) && daysSinceLastSolution[userIdFromFileName] > daysSince) {
-                        daysSinceLastSolution[userIdFromFileName] = daysSince;
-                    }
-                } else
-                {
-                    await LoggingService.LogMessage(LogLevel.Error, $"Encountered trouble parsing userId from file solution name. ");
-                }
-            }
-        }
-
-        public static async Task CreateDailyChallenge(SocketInteractionContext Context, string leetcodeURL, string challengeName, string challengeId)
+        public static async Task CreateDailyChallenge(SocketInteractionContext Context, string leetcodeURL, string leetcodeName, int leetcodeNumber)
         {
 
             // Create new thread
             var channel = Context.Guild.GetChannel(Context.Channel.Id) as ITextChannel;
             string date = $"{DateTime.Now.Month}/{DateTime.Now.Day}/{DateTime.Now.Year}";
             var newThread = await channel.CreateThreadAsync(
-                name: $"{date} {challengeName}",
+                name: $"{date} {leetcodeName}",
                 autoArchiveDuration: ThreadArchiveDuration.OneWeek,
                 invitable: true,
                 type: ThreadType.PublicThread
             );
             await newThread.SendMessageAsync(leetcodeURL);
-            await newThread.SendMessageAsync($"{date},{challengeId},{challengeName}");
+            await newThread.SendMessageAsync($"{date},{leetcodeNumber},{leetcodeName}");
 
-            HashSet<ulong> subscribedUsers = await ShameTrainFileLoader.LoadSubscribedUsers();
+
+            // Tag all subscribed users in challenge thread
+            List<ChallengeSubscriberModel> subscribed = await Program._challengeSubscriberRepo.GetSubscribersForChannel(channel.Id.ToString());
             List<string> userMentions = new List<string>();
-            foreach (ulong user in subscribedUsers)
+            foreach (ChallengeSubscriberModel user in subscribed)
             {
-                userMentions.Add($"<@{user}>");
+                userMentions.Add($"<@{user.UserId}>");
             }
-
             await newThread.SendMessageAsync($"{string.Join(",", userMentions)}");
-
 
             // Grant permissions - this will give everyone in the challenge thread the following permissions
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubmitChallenge);
@@ -108,30 +50,24 @@ namespace DiscordBot.services
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubscribeShameTrain);
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.UnsubscribeShameTrain);
 
-            // Create challenge folder
-            // Files are saved under thread id
-            // output/shame_train/challange/<thread_id>/
-            //                                         /challangeDetails.txt
-            //                                         /subscribed_users.txt
-            //                                         /ect ...
-            Console.WriteLine($"Creating new directory here: {Constants.ShameTrainChallengeDirectory}{newThread.Id}{Constants.slash}");
-            string challange_directory = $"{Constants.ShameTrainChallengeDirectory}{newThread.Id}{Constants.slash}";
-            
-            Directory.CreateDirectory(challange_directory);
-            Console.WriteLine("Done creating directories");
+            // Store challenge details in db
+            ChallengeModel challenge = new ChallengeModel()
+            {
+                ChallengeId = newThread.Id.ToString(),
+                ChannelId = channel.Id.ToString(),
+                ServerId = channel.GuildId.ToString(),
+                CreationDate = DateTime.Now,
+                LeetcodeName = leetcodeName,
+                LeetcodeNumber = leetcodeNumber
+            };
+            await Program._challengeRepo.AddChallenge(challenge);
 
             // Copy over currently subscibed users
             // This is to maintain a record of who participated in what challenges even after someone unsubscribes
-            ShameTrainFileLoader.CopySubscribedUsersToChallengeFolder(challange_directory);
-
-
-            // Save details
-            ChallengeDetails details = new ChallengeDetails();
-            details.ChallengeName = challengeName;
-            details.ChallengeId = int.Parse(challengeId);
-            details.ChallengeDate = date;
-            ShameTrainFileLoader.SaveChallengeDetails(newThread.Id, details);
-
+            foreach (ChallengeSubscriberModel user in subscribed)
+            {
+                await Program._challengeSubscriberRepo.AddSubscriber(newThread.Id.ToString(), user.UserId, DateTime.Now);
+            }
         }
 
         public static async Task<bool> VerifySubmission(ulong challengeId, ulong userId)
@@ -147,87 +83,20 @@ namespace DiscordBot.services
             return await ShameTrainFileLoader.LoadSolution(language, challengeId, userId);
         }
 
-        public static async Task SubscribeUser(SocketInteractionContext Context, ulong userId)
+        public static async Task SubscribeUser(SocketInteractionContext Context, string userId)
         {
-            HashSet<ulong> subscribed_users = await ShameTrainFileLoader.LoadSubscribedUsers();
-            if (!subscribed_users.Contains(userId))
-            {
-                subscribed_users.Add(userId);
-                await ShameTrainFileLoader.SaveSubscribedUsers(subscribed_users);
-            }
+            await Program._challengeSubscriberRepo.AddSubscriber(Context.Channel.Id.ToString(), userId, DateTime.Now);
         }
 
-        public static async Task UnsubscribeUser(SocketInteractionContext Context, ulong userId)
+        public static async Task UnsubscribeUser(SocketInteractionContext Context, string userId)
         {
-            HashSet<ulong> subscribed_users = await ShameTrainFileLoader.LoadSubscribedUsers();
-            subscribed_users.Remove(userId);
-            await ShameTrainFileLoader.SaveSubscribedUsers(subscribed_users);
+            await Program._challengeSubscriberRepo.RemoveSubscriber(Context.Channel.Id.ToString(), userId);
+
         }
-
-
-        // Unused until I can figure out how to download leetcode webpage
-        private static (string name, string id) ExtractChallengeInfoFromSource(string source, string original_url)
-        {
-            // HTML Title Example
-            //< a class="no-underline hover:text-blue-s dark:hover:text-dark-blue-s truncate cursor-text whitespace-normal hover:!text-[inherit]" href="/problems/two-sum/">1. Two Sum</a>
-
-            // Example url:
-            //https://leetcode.com/problems/two-sum/description/
-            original_url.Replace("http://", "");
-
-            // Example urlParts:
-            // { leetcode.com, problems, two-sum, description }
-            string[] urlParts = original_url.Split('/');
-
-            string startSearchString = $"hover:!text-[inherit]\" href =\"/{urlParts[1]}/{urlParts[2]}\">";
-            Console.WriteLine($"startSearchString: {startSearchString}");
-
-            int titleStartIndex = source.IndexOf(startSearchString);
-            Console.WriteLine($"titleStartIndex: {titleStartIndex}");
-
-            int titleEndIndex = source.IndexOf("</a>", titleStartIndex);
-            Console.WriteLine($"titleEndIndex: {titleEndIndex}");
-
-            string titleAndId = source.Substring(titleStartIndex, titleEndIndex - titleStartIndex);
-
-
-            Console.WriteLine($"titleAndId: {titleAndId}");
-            string[] titleParts = titleAndId.Split('.');
-            Console.WriteLine($"name: {titleParts[1]}");
-            Console.WriteLine($"is: {titleParts[0]}");
-            return (titleParts[1].Trim(), titleParts[0].Trim());
-        }
-
-        private static async Task<string> ExtractAndFormatProblemNameFromURL(string url)
-        {
-            //Example url
-            //https://leetcode.com/problems/two-sum/description/
-            url.Replace("http://", "");
-
-            string[] urlParts = url.Split('/');
-
-            int expectedNumberOfParts = 4;
-            if (urlParts.Length != expectedNumberOfParts)
-            {
-                string[] errorMessages = new string[]
-                {
-                    $"URL had a suprising number of parts. Expected:{expectedNumberOfParts}, Recieved:{urlParts.Length}",
-                    $"URL in question: {url}"
-                };
-                await LoggingService.LogMessage(LogLevel.Error, errorMessages);
-            }
-
-            string rawName = urlParts[2];
-
-
-            return "";
-        }
-
     }
 
     public static class ShameTrainFileLoader
     {
-
         public static async Task<HashSet<ulong>> LoadSubscribedUsers()
         {
             try

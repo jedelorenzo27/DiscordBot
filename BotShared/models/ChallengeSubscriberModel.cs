@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace BotShared.models
 {
-    public class ChallengeSubmissionModel
+    public class ChallengeSubscriberModel
     {
         public string ChannelId { get; set; }
         public string UserId { get; set; }
-        public DateTime SubmissionDate { get; set; }
+        public DateTime SubscribeDate { get; set; }
     }
 }

@@ -50,20 +50,20 @@ namespace BotDataAccess.repositories
             if (await GetEntitlementById(id, entitlement) != null)
             {
                 var sql = $"INSERT INTO Entitlements VALUES ('{id}', '{entitlement}', '{DateTime.Now}');";
-                await _db.QueryAsync(sql);
+                await _db.ExecuteAsync(sql);
             }
         }
 
         public async Task RemoveEntitlement(string id, Entitlement entitlement)
         {
             var sql = $"DELETE FROM Entitlements WHERE Id = {id} AND Entitlment = {entitlement};";
-            await _db.QuerySingleOrDefaultAsync<EntitlementModel>(sql);
+            await _db.ExecuteAsync(sql);
         }
 
         public async Task RemoveAllEntitlements(string id)
         {
             var sql = $"DELETE FROM Entitlements WHERE Id = {id};";
-            await _db.QuerySingleOrDefaultAsync<EntitlementModel>(sql, new { Id = id });
+            await _db.ExecuteAsync(sql);
         }
     }
 }

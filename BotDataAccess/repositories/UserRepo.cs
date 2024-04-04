@@ -19,10 +19,20 @@ namespace BotDataAccess.repositories
             _db = new SqlConnection(connectionString);
         }
 
-        public async Task<UserModel> GetUserbyId(ulong userId)
+        public async Task<UserModel> GetUserbyId(string userId)
         {
-            var sql = "SELECT * FROM Users WHERE Users = @Users;";
-            return await _db.QuerySingleOrDefaultAsync<UserModel>(sql, new { UserId = userId });
+            var sql = $"SELECT * FROM Users WHERE Users = '{userId}';";
+            return await _db.QuerySingleOrDefaultAsync<UserModel>(sql);
+        }
+
+        public async Task<int> AddUser(string userId, UserType userType, string name)
+        {
+            if (await GetUserbyId(userId) == null)
+            {
+                var sql = $"INSERT INTO ChallengeSubscribers VALUES ('{userId}', '{userType}', '{name}', '0');";
+                return await _db.ExecuteAsync(sql);
+            }
+            return 0;
         }
     }
 }

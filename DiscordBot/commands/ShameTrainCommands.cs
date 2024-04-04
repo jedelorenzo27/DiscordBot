@@ -12,7 +12,7 @@ namespace DiscordBot.commands
         [SlashCommand("shame", "Shame users for not completing the daily")]
         public async Task Shame()
         {
-            Console.WriteLine("Shaming");
+            /*Console.WriteLine("Shaming");
             await PermissionsService.ValidatePermissions(Context, Entitlement.Shame);
             //await DeferAsync();
             await LoggingService.LogCommandUse(Context, "shame");
@@ -57,7 +57,7 @@ namespace DiscordBot.commands
             }
             Console.WriteLine("Sending discord message of shame");
 
-            await RespondAsync(string.Join("\n", messageLines.ToArray()));
+            await RespondAsync(string.Join("\n", messageLines.ToArray()));*/
         }
 
         [SlashCommand("create-challenge", "Create a new challenge thread in the-daily")]
@@ -68,8 +68,9 @@ namespace DiscordBot.commands
             ] string difficulty, string challengeName, string challengeId)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.CreateChallenge);
+            await DeferAsync();
             await LoggingService.LogCommandUse(Context, "create-challenge");
-            await ShameTrainServices.CreateDailyChallenge(Context, leetcodeURL, challengeName, challengeId);
+            await ShameTrainServices.CreateDailyChallenge(Context, leetcodeURL, challengeName, int.Parse(challengeId));
             await RespondAsync(text: $"Created thread");
             await DeleteOriginalResponseAsync();
         }
@@ -132,7 +133,7 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubscribeShameTrain);
             await LoggingService.LogCommandUse(Context, "subscribe");
-            await ShameTrainServices.SubscribeUser(Context, Context.User.Id);
+            await ShameTrainServices.SubscribeUser(Context, Context.User.Id.ToString());
             await RespondAsync($"Welcome aboard, {Context.User.Username}. The shame train arrives everyday Monday-Friday. The only way to ensure you're not on it is to complete #the-daily challenge and submit you're solution via /submit-challenge in the challenge thread. ");
         }
 
@@ -146,7 +147,7 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.UnsubscribeShameTrain);
             await LoggingService.LogCommandUse(Context, "unsubscribe");
-            await ShameTrainServices.UnsubscribeUser(Context, Context.User.Id);
+            await ShameTrainServices.UnsubscribeUser(Context, Context.User.Id.ToString());
             await RespondAsync($"Missing messages of shame. You're off the hook this time, {Context.User.Username}. Now get out of here you little scamp!");
         }
 

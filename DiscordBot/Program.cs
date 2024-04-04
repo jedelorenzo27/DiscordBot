@@ -27,6 +27,8 @@ public class Program
 
 
     public static ChallengeRepo _challengeRepo;
+    public static ChallengeSubmissionRepo _challengeSubmissionRepo;
+    public static ChallengeSubscriberRepo _challengeSubscriberRepo;
     public static EntitlementRepo _entitlementRepo;
 
     public static async Task Main(string[] args) => await new Program().MainAsync();
@@ -45,10 +47,22 @@ public class Program
         var connectionString = DbConfiguration.GetDatabaseConnectionString(configuration);
         var dbConnection = new SqlConnection(connectionString);
         _challengeRepo = new ChallengeRepo(connectionString);
+        _challengeSubmissionRepo = new ChallengeSubmissionRepo(connectionString);
+        _challengeSubscriberRepo = new ChallengeSubscriberRepo(connectionString);
         _entitlementRepo = new EntitlementRepo(connectionString);
 
         await PermissionsService.LoadPermissions();
-        await ShameTrainServices.JumpStartShameTrain();
+
+        string devChannel = "1103512627675672608";
+        await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JayUserId, DateTime.Now);
+        await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JonathanUserId, DateTime.Now);
+        await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.ChrisUserId, DateTime.Now);
+        List<ChallengeSubscriberModel> models = await _challengeSubscriberRepo.GetSubscribersForChannel(devChannel);
+        Console.WriteLine($"Total Subscribed: {models.Count}");
+        foreach(ChallengeSubscriberModel model in models)
+        {
+            Console.WriteLine($"Subscribed: {model.UserId}");
+        }
 
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,

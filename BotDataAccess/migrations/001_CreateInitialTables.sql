@@ -13,21 +13,22 @@ CREATE TABLE Entitlements (
 );
 
 CREATE TABLE Challenges (
-    ChannelId NVARCHAR(20), -- Same as thread id, all challenges are associated with a thread
+    ChallengeId NVARCHAR(20) PRIMARY KEY, -- Same as thread id, all challenges are associated with a thread
+    ChannelId NVARCHAR(20), -- discord server id
     ServerId NVARCHAR(20), -- discord server id
     CreationDate DATETIME,
-    LeetcodeNumber NUMERIC(5), 
-    LeetcodeName NVARCHAR(20)
+    LeetcodeName NVARCHAR(60),
+    LeetcodeNumber NUMERIC(5) 
 );
 
 CREATE TABLE ChallengeSubmissions (
-    ChannelId NVARCHAR(20),
+    ChallengeId NVARCHAR(20),
     UserId NVARCHAR(20),
     SubmissionDate DATETIME
 );
 
 CREATE TABLE ChallengeSubscribers (
-    ChannelId NVARCHAR(20), -- Could be Discord Server Id or Thread Id associated with a specific challenge
+    ChannelId NVARCHAR(20), -- The channel where challenges are posted
     UserId NVARCHAR(20),
     SubscribeDate DATETIME
 );

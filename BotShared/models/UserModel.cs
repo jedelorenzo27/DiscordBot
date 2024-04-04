@@ -16,7 +16,7 @@ namespace BotShared.models
 
     public class UserModel
     {
-        public ulong UserId { get; set; }
+        public string UserId { get; set; }
         public UserType UserType { get; set; }
         public string Name { get; set; }
         public bool Banned { get; set; }
