@@ -56,13 +56,18 @@ public class Program
         await PermissionsService.LoadPermissions();
 
         string devChannel = "1103512627675672608";
-
-        await _challengeSubscriberRepo.AddSubscriber(devChannel, Constants.JayUserId, DateTime.Now);
+        string devServer = "806901327120039947";
+        await _challengeSubscriberRepo.AddSubscriber(devServer, Constants.JayUserId, DateTime.Now);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.GrantPermission);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.CreateChallenge);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.BackfillChallenge);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.Shame);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.SubmitChallenge);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.SubscribeShameTrain);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.SubscribeOtherToShameTrain);
         await _entitlementRepo.AddEntitlement(Constants.JonathanUserId, Entitlement.GrantPermission);
 
-        List<ChallengeSubscriberModel> models = await _challengeSubscriberRepo.GetSubscribersForChannel(devChannel);
+        List<ChallengeSubscriberModel> models = await _challengeSubscriberRepo.GetSubscribersByDiscordId(devChannel);
         Console.WriteLine($"Total Subscribed: {models.Count}");
         foreach(ChallengeSubscriberModel model in models)
         {

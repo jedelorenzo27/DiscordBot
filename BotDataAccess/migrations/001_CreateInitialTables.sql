@@ -13,14 +13,13 @@ CREATE TABLE UsageStats (
 
 -- Permissions table ('Permissions' is a sql keyword) 
 CREATE TABLE Entitlements (
-    Id NVARCHAR(20),
+    Id NVARCHAR(20), -- Could be userId, threadId, channelId, serverId
     Entitlement NVARCHAR(50),
     Granted DATETIME
 );
 
 CREATE TABLE Challenges (
     ChallengeId NVARCHAR(20) PRIMARY KEY, -- Same as thread id, all challenges are associated with a thread
-    ChannelId NVARCHAR(20), -- discord server id
     ServerId NVARCHAR(20), -- discord server id
     CreationDate DATETIME,
     LeetcodeName NVARCHAR(60),
@@ -31,11 +30,13 @@ CREATE TABLE Challenges (
 CREATE TABLE ChallengeSubmissions (
     ChallengeId NVARCHAR(20),
     UserId NVARCHAR(20),
+    BigO NVARCHAR(20),
+    ProgrammingLanguage NVARCHAR(30),
     SubmissionDate DATETIME
 );
 
 CREATE TABLE ChallengeSubscribers (
-    ChannelId NVARCHAR(20), -- The channel where challenges are posted
+    DiscordId NVARCHAR(20), -- The thread or server the user will be subscribed to
     UserId NVARCHAR(20),
     SubscribeDate DATETIME
 );

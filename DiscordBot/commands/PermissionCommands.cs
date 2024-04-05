@@ -66,6 +66,7 @@ namespace SpecterAI.commands
             [Choice("SubmitChallenge", "SubmitChallenge")]
             [Choice("VerifySubmission", "VerifySubmission")]
             [Choice("SubscribeShameTrain", "SubscribeShameTrain")]
+            [Choice("SubscribeOtherToShameTrain", "SubscribeOtherToShameTrain")]
             [Choice("UnsubscribeShameTrain", "UnsubscribeShameTrain")]
             [Choice("ViewChallengeSubmissions", "ViewChallengeSubmissions")]
             string permission)

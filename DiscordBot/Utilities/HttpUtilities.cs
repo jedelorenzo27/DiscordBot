@@ -1,4 +1,5 @@
-﻿using SpecterAI.services;
+﻿using Azure;
+using SpecterAI.services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,15 @@ namespace SpecterAI.Utilities
 {
     public static class HttpUtilities
     {
+
+        public static async Task<Stream> DownloadFileToStream(HttpClient client, string url)
+        {
+            HttpResponseMessage response = await client.GetAsync(url);
+            return await response.Content.ReadAsStreamAsync();
+        }
+
+
+        // Probably doesn't work in azure
         public static async Task DownloadFileAsync(HttpClient client, string uri, string outputPath)
         {
             Console.WriteLine("Dowloading file");

@@ -1,14 +1,7 @@
 ﻿using BotShared.models;
-using Discord;
 using Discord.Interactions;
 using DiscordBot.Utilities;
 using SpecterAI.Utilities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SpecterAI.services
 {

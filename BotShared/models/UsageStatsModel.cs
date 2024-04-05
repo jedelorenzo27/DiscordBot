@@ -16,6 +16,6 @@ namespace BotShared.models
     {
         public string Id { get; set; }
         public string StatType { get; set; }
-        public string TimesUsed { get; set; }
+        public int TimesUsed { get; set; }
     }
 }

@@ -30,6 +30,8 @@ namespace BotShared.models
         Shame,
         [Description("Create Challenge")]
         CreateChallenge,
+        [Description("Backfill Challenge")]
+        BackfillChallenge,
         [Description("Delete Challenge")]
         DeleteChallenge,
         [Description("Submit Challenge")]
@@ -38,10 +40,12 @@ namespace BotShared.models
         VerifySubmission,
         [Description("Subscribe To ShameTrain")]
         SubscribeShameTrain,
+        [Description("Subscribe Other To ShameTrain")]
+        SubscribeOtherToShameTrain,
         [Description("Unsubscribe From ShameTrain")]
         UnsubscribeShameTrain,
         [Description("View Challenge Submissions")]
-        ViewChallengeSubmissions,
+        ViewChallengeSubmissions
     }
 
     public class EntitlementModel

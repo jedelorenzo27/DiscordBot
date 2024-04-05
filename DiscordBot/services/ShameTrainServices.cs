@@ -5,22 +5,124 @@ using DiscordBot.Utilities;
 using SpecterAI.Utilities;
 using Version = DiscordBot.Utilities.Version;
 using BotShared.models;
+using System.Threading.Channels;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DiscordBot.services
 {
-    public class ChallengeDetails
+    public class ShameStats
     {
-        public string ChallengeName = "";
-        public int ChallengeId = -1;
-        public string ChallengeDate = "";
-        public Version version = new Version(1,0,0);
+        public List<(string userId, int missedChallenges)> countSinceLastSubmission;
+        public int totalChallenges;
     }
 
     public static class ShameTrainServices
     {
+
+        public static async Task<ShameStats> GetShameStats(SocketInteractionContext Context)
+        {
+            List<ChallengeModel> challenges = await Program._challengeRepo.GetChallengesByServerId(Context.Guild.Id.ToString());
+            challenges.Sort((ch1, ch2) => DateTime.Compare(ch1.CreationDate, ch2.CreationDate));
+            challenges.Reverse();
+
+            List<ChallengeSubscriberModel> currentSubscribers = await Program._challengeSubscriberRepo.GetSubscribersByDiscordId(Context.Guild.Id.ToString());
+
+            Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions = new Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)>();
+            foreach (ChallengeModel challenge in challenges)
+            {
+                HashSet<string> seenUserIds = new HashSet<string>();
+
+                List<ChallengeSubmissionModel> submissions = await Program._challengeSubmissionRepo.GetSubmissionsForChallenge(challenge.ChallengeId);
+                // remove multiple submissions since we only care about whether they have at least one submission
+                for(int i = submissions.Count - 1; i >= 0; i--)
+                {
+                    if (seenUserIds.Contains(submissions[i].UserId))
+                    {
+                        submissions.RemoveAt(i);
+                    } else
+                    {
+                        seenUserIds.Add(submissions[i].UserId);
+                    }
+                }
+                challengeIdToSubmissions.Add(challenge.ChallengeId, (challenge, submissions));
+            }
+
+            List<(string userId, int missedChallenges)> missedChallengeCounts = await CountChallengesSinceLastSubmission(challengeIdToSubmissions, currentSubscribers);
+            return new ShameStats()
+            {
+                countSinceLastSubmission = missedChallengeCounts,
+                totalChallenges = challenges.Count,
+            };
+        }
+
+        private static async Task<List<(string userId, int missedChallenges)>> CountChallengesSinceLastSubmission(Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions, List<ChallengeSubscriberModel> currentSubscribers)
+        {
+            List<(string userId, int missedChallenges)> missedChallengeCounts = new List<(string userId, int missedChallenges)>();
+            int missedChallengeCount = 0;
+            HashSet<string> subscribers = SubscribersModelToIdSet(currentSubscribers);
+            foreach (string challengeId in challengeIdToSubmissions.Keys)
+            {
+                foreach (ChallengeSubmissionModel submission in challengeIdToSubmissions[challengeId].submissions)
+                {
+                    if (subscribers.Contains(submission.UserId))
+                    {
+                        missedChallengeCounts.Add((submission.UserId, missedChallengeCount));
+                        subscribers.Remove(submission.UserId);
+                    }
+                }
+                missedChallengeCount++;
+            }
+
+            foreach (string subscriberId in subscribers)
+            {
+                missedChallengeCounts.Add((subscriberId, missedChallengeCount));
+            }
+            return missedChallengeCounts;
+        }
+
+        private static HashSet<string> SubscribersModelToIdSet(List<ChallengeSubscriberModel> subscribers)
+        {
+            HashSet<string> result = new HashSet<string>();
+            foreach(ChallengeSubscriberModel subscriber in subscribers)
+            {
+                result.Add(subscriber.UserId);
+            }
+            return result;
+        }
+
+
+        public static async Task BackfillChallenge(SocketInteractionContext Context, int leetcodeNumber, string[] userIdsWithSubmissions)
+        {
+            string leetcodeName = Context.Channel.Name;
+            leetcodeName = leetcodeName.Substring(leetcodeName.IndexOf(' '));
+
+            // Grant permissions - this will give everyone in the challenge thread the following permissions
+            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.SubmitChallenge);
+            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.VerifySubmission);
+            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.ViewChallengeSubmissions);
+            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.SubscribeShameTrain);
+            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.UnsubscribeShameTrain);
+
+            // Store challenge details in db
+            ChallengeModel challenge = new ChallengeModel()
+            {
+                ChallengeId = Context.Channel.Id.ToString(),
+                ServerId = Context.Guild.Id.ToString(),
+                CreationDate = Context.Channel.CreatedAt.DateTime,
+                LeetcodeName = leetcodeName,
+                LeetcodeNumber = leetcodeNumber
+            };
+            await Program._challengeRepo.AddChallenge(challenge);
+
+            foreach(string userId in userIdsWithSubmissions)
+            {
+                await SubmitSolution(Context, userId, null, Language.Unknown, TimeComplexity.Unknown);
+            }
+        }
+
         public static async Task CreateDailyChallenge(SocketInteractionContext Context, string leetcodeURL, string leetcodeName, int leetcodeNumber)
         {
-
             // Create new thread
             var channel = Context.Guild.GetChannel(Context.Channel.Id) as ITextChannel;
             string date = $"{DateTime.Now.Month}/{DateTime.Now.Day}/{DateTime.Now.Year}";
@@ -33,9 +135,8 @@ namespace DiscordBot.services
             await newThread.SendMessageAsync(leetcodeURL);
             await newThread.SendMessageAsync($"{date},{leetcodeNumber},{leetcodeName}");
 
-
             // Tag all subscribed users in challenge thread
-            List<ChallengeSubscriberModel> subscribed = await Program._challengeSubscriberRepo.GetSubscribersForChannel(channel.Id.ToString());
+            List<ChallengeSubscriberModel> subscribed = await Program._challengeSubscriberRepo.GetSubscribersByDiscordId(Context.Guild.Id.ToString());
             List<string> userMentions = new List<string>();
             foreach (ChallengeSubscriberModel user in subscribed)
             {
@@ -47,14 +148,13 @@ namespace DiscordBot.services
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubmitChallenge);
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.VerifySubmission);
             await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.ViewChallengeSubmissions);
-            //await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubscribeShameTrain);
-            //await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.UnsubscribeShameTrain);
+            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubscribeShameTrain);
+            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.UnsubscribeShameTrain);
 
             // Store challenge details in db
             ChallengeModel challenge = new ChallengeModel()
             {
                 ChallengeId = newThread.Id.ToString(),
-                ChannelId = channel.Id.ToString(),
                 ServerId = channel.GuildId.ToString(),
                 CreationDate = DateTime.Now,
                 LeetcodeName = leetcodeName,
@@ -77,153 +177,40 @@ namespace DiscordBot.services
             return taskFiles.Length > 0;
         }
 
-        public static async Task<string[]> SubmitSolution(SocketInteractionContext Context, Attachment solution, string language, string timeComplexity, ulong challengeId, ulong userId)
+        public static async Task<string[]> SubmitSolution(SocketInteractionContext Context, Attachment solution, Language language, TimeComplexity timeComplexity)
         {
-            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.SubscribeShameTrain);
-            await ShameTrainFileLoader.SaveSolution(solution, language, challengeId, userId);
-            return await ShameTrainFileLoader.LoadSolution(language, challengeId, userId);
+            return await SubmitSolution(Context, Context.User.Id.ToString(), solution, language, timeComplexity);
         }
 
-        public static async Task SubscribeUser(SocketInteractionContext Context, string userId)
+        public static async Task<string[]> SubmitSolution(SocketInteractionContext Context, string UserId, Attachment solution, Language language, TimeComplexity timeComplexity)
         {
-            await Program._challengeSubscriberRepo.AddSubscriber(Context.Channel.Id.ToString(), userId, DateTime.Now);
-        }
-
-        public static async Task UnsubscribeUser(SocketInteractionContext Context, string userId)
-        {
-            await Program._challengeSubscriberRepo.RemoveSubscriber(Context.Channel.Id.ToString(), userId);
-
-        }
-    }
-
-    public static class ShameTrainFileLoader
-    {
-        public static async Task<HashSet<ulong>> LoadSubscribedUsers()
-        {
-            try
+            await SubscribeUser(Context, Context.Channel.Id.ToString(), Context.User.Id.ToString());
+            await SubscribeUser(Context, Context.Guild.Id.ToString(), Context.User.Id.ToString());
+            List<string> lines = new List<string>();
+            if (solution != null)
             {
-                HashSet<ulong> userIds = new HashSet<ulong>();
-                string[] string_userIds = File.ReadAllLines(Constants.ShameTrainSubscribedUsersFilePath);
-                foreach (string userId in string_userIds)
+                using (var reader = new StreamReader(await HttpUtilities.DownloadFileToStream(Program._httpClient, solution.Url)))
                 {
-                    Console.WriteLine(userId);
-                    userIds.Add(ulong.Parse(userId));
-                }
-                return userIds;
-            }
-            catch (Exception ex)
-            {
-                string[] errors = new string[]
-                {
-                    "Failed while loading ShameTrain subscibed users",
-                    ex.ToString()
-                };
-                await LoggingService.LogMessage(LogLevel.Error, errors);
-            } 
-            return new HashSet<ulong>();
-        }
-
-        public static async Task SaveSubscribedUsers(HashSet<ulong> subscribedUsers)
-        {
-            try
-            {
-                File.Delete(Constants.ShameTrainSubscribedUsersFilePath);
-                File.WriteAllText(Constants.ShameTrainSubscribedUsersFilePath, string.Join("\n", subscribedUsers));
-            } catch (Exception ex)
-            {
-                string[] errors = new string[]
-                {
-                    "Failed while saving ShameTrain subscibed users",
-                    ex.ToString()
-                };
-                await LoggingService.LogMessage(LogLevel.Error, errors);
-            }
-        }
-
-        public static void CopySubscribedUsersToChallengeFolder(string toFolder)
-        {
-            File.Copy(Constants.ShameTrainSubscribedUsersFilePath, $"{toFolder}{Constants.ShameTrainSubscribedUsersFileName}");
-        }
-
-        public static async Task<string[]> LoadSolution(string language, ulong challangeId, ulong userId)
-        {
-            try
-            {
-                string fileName = $"{userId}.{language}";
-                string fullFilePath = $"{Constants.ShameTrainChallengeDirectory}{challangeId}{Constants.slash}{Constants.ShameTrainChallengeSolutionDirectory}{fileName}";
-                return File.ReadAllLines(fullFilePath);
-            } catch (Exception ex)
-            {
-                string[] errors = new string[]
-                {
-                    $"Something went wrong while trying to load solution for challengeId={challangeId} userId={userId}",
-                    ex.Message
-                };
-                await LoggingService.LogMessage(LogLevel.Error, errors);
-            }
-            return new string[] { };
-        }
-
-        public static async Task SaveSolution(Attachment solution, string language, ulong challangeId, ulong userId)
-        {
-            string fileName = $"{userId}.{language}";
-            /*
-            // Add versioning for multiple submissions. Fow now only allow one submission
-            DirectoryInfo taskDirectory = new DirectoryInfo($"{Constants.ShameTrainChallengeDirectory}{challangeId}");
-            FileInfo[] taskFiles = taskDirectory.GetFiles($"*{fileName}");
-            Array.Sort(taskFiles, (a,b) => { return a.Name.CompareTo(b.Name); });
-            */
-            string fullFileDirectory = $"{Constants.ShameTrainChallengeDirectory}{challangeId}{Constants.slash}{Constants.ShameTrainChallengeSolutionDirectory}";
-            string fullFilePath = $"{fullFileDirectory}{fileName}";
-            Directory.CreateDirectory(fullFileDirectory);
-            if (File.Exists(fullFilePath))
-            {
-                File.Delete(fullFilePath);
-            }
-
-            await HttpUtilities.DownloadFileAsync(Program._httpClient, solution.Url, fullFilePath);
-        }
-
-
-        public static ChallengeDetails LoadChallengeDetails(ulong challengeId)
-        {
-            ChallengeDetails challengeDetails = new ChallengeDetails();
-            string challengeDirectory = Constants.ShameTrainChallengeDirectory + challengeId + Constants.ShameTrainChallengeSolutionDirectory;
-            if (Directory.Exists(challengeDirectory))
-            {
-                string[] lines = File.ReadAllLines(challengeDirectory + Constants.slash + Constants.ShameTrainChallengeDetailsFileName);
-                foreach(string line in lines)
-                {
-                    string[] parts = line.Split(Constants.ShameTrainChallengeDetailsFileNameDelimiter);
-                    switch(parts[0])
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        case Constants.ChallengeName:
-                            challengeDetails.ChallengeName = parts[1];
-                            break;
-                        case Constants.ChallengeId:
-                            challengeDetails.ChallengeId = int.Parse(parts[1]);
-                            break;
-                        case Constants.ChallengeDate:
-                            challengeDetails.ChallengeDate = parts[1];
-                            break;
-                        case Constants.ChallengeVersion:
-                            challengeDetails.version = new Version(parts[1]);
-                            break;
+                        lines.Add(line);
                     }
                 }
             }
-            return challengeDetails;
+            await Program._challengeSubmissionRepo.AddSubmission(Context.Channel.Id.ToString(), Context.User.Id.ToString(), timeComplexity, language, DateTime.Now);
+            return lines.ToArray();
         }
 
-        public static void SaveChallengeDetails(ulong challengeId, ChallengeDetails details)
+        public static async Task SubscribeUser(SocketInteractionContext Context, string discordId, string userId)
         {
-            List<string> lines = new List<string>();
-            lines.Add($"{Constants.ChallengeName}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.ChallengeName}");
-            lines.Add($"{Constants.ChallengeDate}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.ChallengeDate}");
-            lines.Add($"{Constants.ChallengeId}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.ChallengeId}");
-            lines.Add($"{Constants.ChallengeId}{Constants.ShameTrainChallengeDetailsFileNameDelimiter}{details.version.ToString()}");
-            File.WriteAllLines($"{Constants.ShameTrainChallengeDirectory}{challengeId}{Constants.slash}{Constants.ShameTrainChallengeDetailsFileName}", lines.ToArray());
+            await Program._challengeSubscriberRepo.AddSubscriber(discordId, userId, DateTime.Now);
         }
 
+        public static async Task UnsubscribeUser(SocketInteractionContext Context, string discordId, string userId)
+        {
+            await Program._challengeSubscriberRepo.RemoveSubscriber(discordId, userId);
+
+        }
     }
 }

@@ -20,14 +20,14 @@ namespace BotDataAccess.repositories
             _db = new SqlConnection(connectionString);
         }
 
-        public async Task<List<ChallengeModel>> GetChallengeByChannelId(int channelId)
+        public async Task<List<ChallengeModel>> GetChallengesByServerId(string serverId)
         {
-            var sql = $"SELECT * FROM Challenges WHERE ChannelId = '{channelId}';";
+            var sql = $"SELECT * FROM Challenges WHERE ServerId = '{serverId}';";
             SqlMapper.GridReader results = await _db.QueryMultipleAsync(sql);
             return (await results.ReadAsync<ChallengeModel>()).ToList();
         }
 
-        public async Task<List<ChallengeModel>> GetChallengeByIdAsync(int challengeId)
+        public async Task<List<ChallengeModel>> GetChallengesByChallengeId(string challengeId)
         {
             var sql = $"SELECT * FROM Challenges WHERE ChallengeId = '{challengeId}';";
             SqlMapper.GridReader results = await _db.QueryMultipleAsync(sql);
@@ -36,7 +36,7 @@ namespace BotDataAccess.repositories
 
         public async Task<int> AddChallenge(ChallengeModel challengeModel)
         {
-            var sql = $"INSERT INTO Challenges VALUES ('{challengeModel.ChallengeId}', '{challengeModel.ChannelId}', '{challengeModel.ServerId}', '{challengeModel.CreationDate}', '{challengeModel.LeetcodeName}', '{challengeModel.LeetcodeNumber}', '{challengeModel.ChallengeDifficulty}');";
+            var sql = $"INSERT INTO Challenges VALUES ('{challengeModel.ChallengeId}', '{challengeModel.ServerId}', '{challengeModel.CreationDate}', '{challengeModel.LeetcodeName}', '{challengeModel.LeetcodeNumber}', '{challengeModel.ChallengeDifficulty}');";
             return await _db.ExecuteAsync(sql, challengeModel);
         }
     }

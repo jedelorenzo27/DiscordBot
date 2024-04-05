@@ -1,8 +1,11 @@
 ﻿using BotShared.models;
 using Discord;
+using Discord.Commands;
 using Discord.Interactions;
 using DiscordBot.services;
 using SpecterAI.services;
+using SpecterAI.Utilities;
+using System.Security;
 
 namespace DiscordBot.commands
 {
@@ -12,52 +15,47 @@ namespace DiscordBot.commands
         [SlashCommand("shame", "Shame users for not completing the daily")]
         public async Task Shame()
         {
-            /*Console.WriteLine("Shaming");
+            Console.WriteLine("Shaming");
             await PermissionsService.ValidatePermissions(Context, Entitlement.Shame);
-            //await DeferAsync();
+            await DeferAsync();
             await LoggingService.LogCommandUse(Context, "shame");
 
-            Dictionary<ulong, int>  allUsers = await ShameTrainServices.UserIdsToDaysSinceLastSubmission(Context);
-            Dictionary<ulong, int> usersNeedingShaming = new Dictionary<ulong, int>();
-            List<ulong> usersSafeFromShame = new List<ulong>();
-
-            Console.WriteLine("Shaming users");
-            foreach(ulong userId in allUsers.Keys)
+            ShameStats shameStats = await ShameTrainServices.GetShameStats(Context);
+            List<string> messageLines = new List<string>()
             {
-                Console.WriteLine($"{userId}: {allUsers[userId]}");
-                if (allUsers[userId] == 0)
-                {
-                    usersSafeFromShame.Add(userId);
-                } else
-                {
-                   usersNeedingShaming.Add(userId, allUsers[userId]);
-                }
+                $"All aboard shame train #{shameStats.totalChallenges}!"
+            };
+
+            List<(string userId, int missedChallenges)> countSinceLastSubmission = new List<(string userId, int missedChallenges)>(shameStats.countSinceLastSubmission);
+            countSinceLastSubmission.Reverse();
+            while (countSinceLastSubmission.Count > 0 && countSinceLastSubmission[0].missedChallenges > 1)
+            {
+                messageLines.Add($"<@{countSinceLastSubmission[0].userId}> failed to complete the last {countSinceLastSubmission[0].missedChallenges} challenges.");
+                countSinceLastSubmission.RemoveAt(0);
             }
 
-            List<string> messageLines = new List<string>();
-            messageLines.Add(":shame_badge: Shame Train is Arriving :shame_badge:");
-
-            foreach(ulong user in usersNeedingShaming.Keys) 
+            while (countSinceLastSubmission.Count > 0 && countSinceLastSubmission[0].missedChallenges > 0)
             {
-                messageLines.Add($"<@{user}> {usersNeedingShaming[user]}");
+                messageLines.Add($"<@{countSinceLastSubmission[0].userId}> failed to complete the last challenge.");
+                countSinceLastSubmission.RemoveAt(0);
             }
+            messageLines.Add("---------------------------------");
 
-            if (usersSafeFromShame.Count > 0)
+            if (countSinceLastSubmission.Count > 0)
             {
-                messageLines.Add("----------------------");
-                messageLines.Add("SAFE");
-
-                foreach (ulong user in usersSafeFromShame)
+                messageLines.Add("The following users are SAFE. Great job out there!");
+                while (countSinceLastSubmission.Count > 0)
                 {
-                    messageLines.Add($":shame_train:<@{user}>");
+                    messageLines.Add($"<@{countSinceLastSubmission[0].userId}>");
+                    countSinceLastSubmission.RemoveAt(0);
                 }
             } else
             {
-                messageLines.Add($"No one was saved.");
+                messageLines.Add("Ok, the shame train is here. Let's go, everyone on.");
             }
-            Console.WriteLine("Sending discord message of shame");
-
-            await RespondAsync(string.Join("\n", messageLines.ToArray()));*/
+            //await RespondAsync(string.Join("\n", messageLines.ToArray()));
+            Action<MessageProperties> action = (x) => { x.Content = string.Join("\n", messageLines.ToArray()); };
+            await ModifyOriginalResponseAsync(action);
         }
 
         [SlashCommand("create-challenge", "Create a new challenge thread in the-daily")]
@@ -74,33 +72,74 @@ namespace DiscordBot.commands
             await DeleteOriginalResponseAsync();
         }
 
+
         [SlashCommand("submit-challenge", "Submit daily-challenge solution")]
         public async Task SubmitSolution(
-            [Choice("solution", "Upload")
-            ] Attachment solution,
-
-            [Choice("CSharp", "cs"),
-            Choice("Javasript", "js"),
-            Choice("Python", "py")
+            [Choice("CSharp", "CSharp"),
+            Choice("Javascript", "Javascript"),
+            Choice("Python", "Python")
             ] string language,
 
-            [Choice("O(n!)", "O(n!)"),
-            Choice("O(2^n)", "O(2^n)"),
-            Choice("O(n^2)", "O(n^2)"),
-            Choice("O(nlogn)", "O(nlogn)"),
-            Choice("O(n)", "O(n)"),
-            Choice("O(logn)", "O(logn)"),
-            Choice("O(n)", "O(n)")
+            [Choice("O(n!)", "N_Factorial"),
+            Choice("O(2^n)", "Two_To_The_N"),
+            Choice("O(n^2)", "M_Squared"),
+            Choice("O(nlogn)", "N_Log_N"),
+            Choice("O(n)", "N"),
+            Choice("O(logn)", "Log_N"),
+            Choice("O(1)", "Constant")
             ] string timeComplexity)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubmitChallenge);
             await DeferAsync();
             await LoggingService.LogCommandUse(Context, "submit-challenge");
-            string[] solutionLines = await ShameTrainServices.SubmitSolution(Context, solution, language, timeComplexity, Context.Channel.Id, Context.User.Id);
+
+            TimeComplexity timeComplexityResult = (TimeComplexity)Enum.Parse(typeof(TimeComplexity), timeComplexity);
+            Language languageResult = (Language)Enum.Parse(typeof(Language), language);
+
+            string[] solutionLines = await ShameTrainServices.SubmitSolution(Context, null, languageResult, timeComplexityResult);
 
             List<string> responseLines = new List<string>
             {
-                $"Thanks for the submission, ${PermissionsService.GetNameFromId(Context.User.Id)}! You're probably safe from the Shame Train... for now. You can verify submission via /verify-submission ",
+                $"Thanks for the submission, <@{Context.User.Id}>! You're probably safe from the Shame Train... for now",
+                $"Solution completes in O({EnumExtensions.ToDescriptionString(timeComplexityResult)})"
+            };
+
+            Action<MessageProperties> action = (x) => { x.Content = string.Join("\n", responseLines.ToArray()); };
+            await ModifyOriginalResponseAsync(action);
+        }
+
+
+        [SlashCommand("submit-challenge-file", "Submit daily-challenge solution with file")]
+        public async Task SubmitSolution(
+            [Choice("solution", "Upload")
+            ] Attachment solution,
+
+            [Choice("CSharp", "CSharp"),
+            Choice("Javascript", "Javascript"),
+            Choice("Python", "Python")
+            ] string language,
+
+            [Choice("O(n!)", "N_Factorial"),
+            Choice("O(2^n)", "Two_To_The_N"),
+            Choice("O(n^2)", "M_Squared"),
+            Choice("O(nlogn)", "N_Log_N"),
+            Choice("O(n)", "N"),
+            Choice("O(logn)", "Log_N"),
+            Choice("O(1)", "Constant")
+            ] string timeComplexity)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.SubmitChallenge);
+            await DeferAsync();
+            await LoggingService.LogCommandUse(Context, "submit-challenge");
+
+            TimeComplexity timeComplexityResult = (TimeComplexity)Enum.Parse(typeof(TimeComplexity), timeComplexity);
+            Language languageResult = (Language)Enum.Parse(typeof(Language), language);
+
+            string[] solutionLines = await ShameTrainServices.SubmitSolution(Context, solution, languageResult, timeComplexityResult);
+
+            List<string> responseLines = new List<string>
+            {
+                $"Thanks for the submission, <@{Context.User.Id}>! You're probably safe from the Shame Train... for now",
                 "||```"
             };
             foreach(string line in solutionLines)
@@ -109,7 +148,10 @@ namespace DiscordBot.commands
                 responseLines.Add(sanitizedLine);
             }
             responseLines.Add("```||");
-            responseLines.Add($"Completed in {timeComplexity}");
+
+            responseLines.Add($"Solution completes in O({EnumExtensions.ToDescriptionString(timeComplexityResult)})");
+
+
 
             Action<MessageProperties> action = (x) => { x.Content = string.Join("\n", responseLines.ToArray()); };
             await ModifyOriginalResponseAsync(action);
@@ -134,8 +176,17 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubscribeShameTrain);
             await LoggingService.LogCommandUse(Context, "subscribe");
-            await ShameTrainServices.SubscribeUser(Context, Context.User.Id.ToString());
+            await ShameTrainServices.SubscribeUser(Context, Context.Guild.Id.ToString(), Context.User.Id.ToString());
             await RespondAsync($"Welcome aboard, {Context.User.Username}. The shame train arrives everyday Monday-Friday. The only way to ensure you're not on it is to complete #the-daily challenge and submit you're solution via /submit-challenge in the challenge thread. ");
+        }
+
+        [SlashCommand("subscribe-other", "subscribe to shame-train challenges")]
+        public async Task SubscribeOther(string userId)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.SubscribeOtherToShameTrain);
+            await LoggingService.LogCommandUse(Context, "subscribe");
+            await ShameTrainServices.SubscribeUser(Context, Context.Guild.Id.ToString(), userId);
+            await RespondAsync($"Welcome aboard, {userId}. The shame train arrives everyday Monday-Friday. The only way to ensure you're not on it is to complete #the-daily challenge and submit you're solution via /submit-challenge in the challenge thread. ");
         }
 
         [SlashCommand("unsubscribe", "unsubscribe from shame-train challenges - you may be shamed one last time")]
@@ -148,7 +199,7 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.UnsubscribeShameTrain);
             await LoggingService.LogCommandUse(Context, "unsubscribe");
-            await ShameTrainServices.UnsubscribeUser(Context, Context.User.Id.ToString());
+            await ShameTrainServices.UnsubscribeUser(Context, Context.Guild.Id.ToString(), Context.User.Id.ToString());
             await RespondAsync($"Missing messages of shame. You're off the hook this time, {Context.User.Username}. Now get out of here you little scamp!");
         }
 
@@ -160,5 +211,14 @@ namespace DiscordBot.commands
 
         }*/
 
+
+        [SlashCommand("backfill-challenge", "backfill")]
+        public async Task BackfillChallenge(int leetcodeNumber, string submittedUsers)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.BackfillChallenge);
+            await LoggingService.LogCommandUse(Context, "backfill-challenge");
+            await ShameTrainServices.BackfillChallenge(Context, leetcodeNumber, submittedUsers.Split(','));
+            await RespondAsync($"Done");
+        }
     }
 }
