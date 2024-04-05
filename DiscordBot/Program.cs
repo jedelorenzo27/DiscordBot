@@ -55,10 +55,10 @@ public class Program
 
         await PermissionsService.LoadPermissions();
 
-        string devChannel = "1103512627675672608";
-        string devServer = "806901327120039947";
-        await _challengeSubscriberRepo.AddSubscriber(devServer, Constants.JayUserId, DateTime.Now);
+        //string devChannel = "1103512627675672608";
+        //string devServer = "806901327120039947";
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.GrantPermission);
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.RemovePermission);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.CreateChallenge);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.BackfillChallenge);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.Shame);
@@ -67,13 +67,7 @@ public class Program
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.SubscribeOtherToShameTrain);
         await _entitlementRepo.AddEntitlement(Constants.JonathanUserId, Entitlement.GrantPermission);
 
-        List<ChallengeSubscriberModel> models = await _challengeSubscriberRepo.GetSubscribersByDiscordId(devChannel);
-        Console.WriteLine($"Total Subscribed: {models.Count}");
-        foreach(ChallengeSubscriberModel model in models)
-        {
-            Console.WriteLine($"Subscribed: {model.UserId}");
-        }
-
+        
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,
         // like messages, new members, etc.
