@@ -30,8 +30,11 @@ namespace BotDataAccess.repositories
             }
             catch (Exception ex)
             {
-                await Logger.LogMessage(LogLevel.Error, $"[GetChallengesByServerId] Failed while retrieving challenges by server Id");
-                await Logger.LogMessage(LogLevel.Error, $"[GetChallengesByServerId] Error: {ex.Message}");
+                string[] errors = new string[] {
+                    $"[GetChallengesByServerId] Failed while retrieving challenges by server Id",
+                    $"[GetChallengesByServerId] Error: {ex.Message}"
+                };
+                await Logger.LogMessage(LogLevel.Error, errors);
                 throw;
             }
         }
@@ -44,8 +47,11 @@ namespace BotDataAccess.repositories
             }
             catch (Exception ex)
             {
-                await Logger.LogMessage(LogLevel.Error, $"[GetChallengeByChallengeId] Failed while retrieving challenge");
-                await Logger.LogMessage(LogLevel.Error, $"[GetChallengeByChallengeId] Error: {ex.Message}");
+                string[] errors = new string[] {
+                    $"[GetChallengeByChallengeId] Failed while retrieving challenge",
+                    $"[GetChallengeByChallengeId] Error: {ex.Message}"
+                };
+                await Logger.LogMessage(LogLevel.Error, errors);
                 throw;
             }
         }
@@ -62,9 +68,12 @@ namespace BotDataAccess.repositories
             }
             catch (Exception ex)
             {
-                await Logger.LogMessage(LogLevel.Error, $"[AddChallenge] Failed while storing challenge");
-                await Logger.LogMessage(LogLevel.Error, $"[AddChallenge] Challenge that failed to store: ({challengeModel})");
-                await Logger.LogMessage(LogLevel.Error, $"[AddChallenge] Error: {ex.Message}");
+                string[] errors = new string[] {
+                    $"[AddChallenge] Failed while storing challenge",
+                    $"[AddChallenge] Challenge that failed to store: ({challengeModel})",
+                    $"[AddChallenge] Error: {ex.Message}"
+                };
+                await Logger.LogMessage(LogLevel.Error, errors);
                 return 0;
             }
         }

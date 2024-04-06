@@ -32,6 +32,7 @@ public class Program
     public static ChallengeSubscriberRepo _challengeSubscriberRepo;
     public static EntitlementRepo _entitlementRepo;
     public static UsageStatsRepo _usageStatsRepo;
+    public static AdminRepo _adminRepo;
 
     public static async Task Main(string[] args) => await new Program().MainAsync();
 
@@ -53,6 +54,7 @@ public class Program
         _challengeSubscriberRepo = new ChallengeSubscriberRepo(connectionString);
         _entitlementRepo = new EntitlementRepo(connectionString);
         _usageStatsRepo = new UsageStatsRepo(connectionString);
+        _adminRepo = new AdminRepo(connectionString);
 
         await PermissionsService.LoadPermissions();
 
