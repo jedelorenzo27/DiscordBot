@@ -8,7 +8,7 @@ namespace DiscordBot.Utilities
 {
     public static class Constants
     {
-        public static Version BotVersion = new Version(1,0,1);
+        public static Version BotVersion = new Version(1,0,2);
 
 
         public static ulong ByteLordzCringeCave_Role_Unemployed = 1211510658282164315;
