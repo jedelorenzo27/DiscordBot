@@ -16,6 +16,7 @@ using Microsoft.Data.SqlClient;
 using BotDataAccess.repositories;
 using DiscordBot.Utilities;
 using BotShared.models;
+using BotShared;
 
 public class Program
 {
@@ -137,8 +138,8 @@ public class Program
     {
         // Register slash commands
         await _interactions.RegisterCommandsGloballyAsync();
-        LoggingService.LoadLoggingServers(_client);
-        await LoggingService.LogMessage(LogLevel.Info, $"Starting bot with version: {Constants.BotVersion}"); ;
+        Logger.LoadLoggingServers(_client, new List<string>() { Constants.DevLogsChannelId});
+        await Logger.LogMessage(LogLevel.Info, $"Starting bot with version: {Constants.BotVersion}"); ;
     }
 
     // Handles non-slash commands

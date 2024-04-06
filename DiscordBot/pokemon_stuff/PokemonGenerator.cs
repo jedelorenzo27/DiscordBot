@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using BotShared;
+using Discord;
 using Discord.Interactions;
 using DiscordBot.Utilities;
 using SixLabors.ImageSharp;
@@ -208,8 +209,8 @@ namespace SpecterAI
             }
             catch (Exception e)
             {
-                await LoggingService.LogMessage(LogLevel.Error, $"Something broke af, error: {e.Message}");
-                await LoggingService.LogMessage(LogLevel.Error, $"{e.StackTrace}");
+                await Logger.LogMessage(LogLevel.Error, $"Something broke af, error: {e.Message}");
+                await Logger.LogMessage(LogLevel.Error, $"{e.StackTrace}");
 
                 await updateStatus(context, generationStep, totalSteps, updateLogs, "Sorry, you're Pokemon is gone and probably dead.");
             }
@@ -240,7 +241,7 @@ namespace SpecterAI
                 definition.type = (PokemonType)possibleType;
             } else
             {
-                await LoggingService.LogMessage(LogLevel.Error, $"Failed to extract pokemon type from: {pokemonType}");
+                await Logger.LogMessage(LogLevel.Error, $"Failed to extract pokemon type from: {pokemonType}");
                 conversation.addMessage(MessageRole.USER, $"This pokemon is Normal Type.");
                 definition.type = PokemonType.NORMAL;
             }
@@ -261,7 +262,7 @@ namespace SpecterAI
             }
             else
             {
-                await LoggingService.LogMessage(LogLevel.Error, $"Failed to extract weakness from: {pokemonWeaknessResponse}");
+                await Logger.LogMessage(LogLevel.Error, $"Failed to extract weakness from: {pokemonWeaknessResponse}");
                 //Do not give a default weakness
             }
         }
@@ -281,7 +282,7 @@ namespace SpecterAI
             }
             else
             {
-                await LoggingService.LogMessage(LogLevel.Error, $"Failed to extract weakness from: {pokemonResistanceResponse}");
+                await Logger.LogMessage(LogLevel.Error, $"Failed to extract weakness from: {pokemonResistanceResponse}");
                 //Do not give a default resistance
             }
         }

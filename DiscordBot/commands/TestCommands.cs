@@ -1,6 +1,6 @@
-﻿using Discord.Commands;
+﻿using BotShared;
+using Discord.Commands;
 using Discord.Interactions;
-using SpecterAI.services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ namespace SpecterAI.commands
         [SlashCommand("test", "Implement with whatever neeeds testing")]
         public async Task testCommand(string input1, string input2)
         {
-            await LoggingService.LogMessage(LogLevel.Debug, input1);
+            await Logger.LogMessage(LogLevel.Debug, input1);
             await RespondAsync("For testing new slash commands while waiting for the UI to update - Currently does nothing");
         }
     }

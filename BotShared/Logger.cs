@@ -1,13 +1,12 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using DiscordBot.Utilities;
-using SpecterAI.Utilities;
 
-namespace SpecterAI.services
+namespace BotShared
 {
     public enum LogLevel
     {
+        DBExecute,
         Action,
         Info,
         Debug,
@@ -16,7 +15,7 @@ namespace SpecterAI.services
     }
 
 
-    public static class LoggingService
+    public static class Logger
     {
         private static string debug_channels_delimiter = "#";
 
@@ -31,7 +30,7 @@ namespace SpecterAI.services
         /// <returns></returns>
         public static async Task LogCommandUse(SocketInteractionContext context, string command)
         {
-            await LogMessage(LogLevel.Action, $"{PermissionsService.GetNameFromId(context.User.Id)} used {command} in {PermissionsService.GetNameFromId(context.Channel.Id)} ({PermissionsService.GetNameFromId(context.Guild.Id)})");
+            await LogMessage(LogLevel.Action, $"{context.User.Id} used {command} in {context.Channel.Id} ({context.Guild.Id})");
 
         }
         public static async Task LogCommandUse(SocketInteractionContext context, string command, string target)
@@ -41,12 +40,12 @@ namespace SpecterAI.services
             {
                 target_string = "self";
             }
-            await LogMessage(LogLevel.Action, $"{PermissionsService.GetNameFromId(context.User.Id)} used {command} in {PermissionsService.GetNameFromId(context.Channel.Id)} ({PermissionsService.GetNameFromId(context.Guild.Id)}) on {target_string}");
+            await LogMessage(LogLevel.Action, $"{context.User.Id} used {command} in channel:{context.Channel.Id} (server:{context.Guild.Id}) on {target_string}");
         }
 
 
 
-        public static async Task LogMessage(LogLevel level, string[] messages, bool localOnly=false)
+        public static async Task LogMessage(LogLevel level, string[] messages, bool localOnly = false)
         {
             await LogMessage(level, string.Join("\n", messages));
         }
@@ -65,19 +64,21 @@ namespace SpecterAI.services
                     return;
                 }
 
-                foreach(string channelId in _debugChannels)
+                foreach (string channelId in _debugChannels)
                 {
                     try
                     {
                         await sendMessageToChannel(ulong.Parse(channelId), $"[{level}] {message}", localOnly);
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         Console.WriteLine($"Failed to send log message to discord channel ({channelId})");
                         Console.WriteLine($"Failed message: \"{message}\"");
                         Console.WriteLine(ex.ToString());
                     }
                 }
-            } else
+            }
+            else
             {
                 Console.WriteLine("Trying to log message before logger is ready");
                 Console.WriteLine($"This message was not successfully logged: \"{message}\"");
@@ -94,9 +95,9 @@ namespace SpecterAI.services
             }
         }
 
-        public static void LoadLoggingServers (DiscordSocketClient client)
+        public static void LoadLoggingServers(DiscordSocketClient client, List<string> debugChannels)
         {
-            _debugChannels.Add(Constants.DevLogsChannelId);
+            _debugChannels = debugChannels;
             _discord = client;
             _ready = true;
         }

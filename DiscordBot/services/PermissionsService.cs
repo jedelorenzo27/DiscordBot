@@ -1,4 +1,5 @@
-﻿using BotShared.models;
+﻿using BotShared;
+using BotShared.models;
 using Discord.Interactions;
 using DiscordBot.Utilities;
 using SpecterAI.Utilities;
@@ -106,13 +107,13 @@ namespace SpecterAI.services
 
         public static async Task GrantPermission(SocketInteractionContext context, string idToGiveEntitlement, Entitlement entitlement)
         {
-            await LoggingService.LogMessage(LogLevel.Info, $"Granting permission ({EnumExtensions.ToDescriptionString(entitlement)}) to user:{GetNameFromId(idToGiveEntitlement)}");
+            await Logger.LogMessage(LogLevel.Info, $"Granting permission ({EnumExtensions.ToDescriptionString(entitlement)}) to user:{GetNameFromId(idToGiveEntitlement)}");
             await Program._entitlementRepo.AddEntitlement(idToGiveEntitlement, entitlement);
         }
 
         public static async Task RemovePermission(SocketInteractionContext context, string idToRemoveEntitlement, Entitlement entitlement)
         {
-            await LoggingService.LogMessage(LogLevel.Info, $"Removing permission ({EnumExtensions.ToDescriptionString(entitlement)}) from user:{GetNameFromId(idToRemoveEntitlement)}");
+            await Logger.LogMessage(LogLevel.Info, $"Removing permission ({EnumExtensions.ToDescriptionString(entitlement)}) from user:{GetNameFromId(idToRemoveEntitlement)}");
             await Program._entitlementRepo.RemoveEntitlement(idToRemoveEntitlement, entitlement);            
         }
 
@@ -120,11 +121,11 @@ namespace SpecterAI.services
         {
             if (unbannable.Contains(idToBan))
             {
-                await LoggingService.LogMessage(LogLevel.Info, $"A user ({GetNameFromId(context.User.Id.ToString())}:{context.User.Id}) tried to ban an unbannable ({GetNameFromId(idToBan)}) user");
+                await Logger.LogMessage(LogLevel.Info, $"A user ({GetNameFromId(context.User.Id.ToString())}:{context.User.Id}) tried to ban an unbannable ({GetNameFromId(idToBan)}) user");
                 await context.Interaction.RespondAsync(GetDeniedMessageForBanningUnbannable(context.User.Id.ToString()));
                 return;
             }
-            await LoggingService.LogMessage(LogLevel.Info, $"Banning user: {GetNameFromId(idToBan)}");
+            await Logger.LogMessage(LogLevel.Info, $"Banning user: {GetNameFromId(idToBan)}");
             _bannedUsers.Add(idToBan);
         }
 
@@ -170,7 +171,7 @@ namespace SpecterAI.services
                 return true;
             }
 
-            await LoggingService.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}'");
+            await Logger.LogMessage(LogLevel.Info, $"{GetNameFromId(context.User.Id.ToString())} failed entitlement check for '{entitlement}'");
             await context.Interaction.RespondAsync(GetDeniedMessageForUnauthrorizedUser(context.User.Id.ToString()));
             throw new UnauthorizedException();
         }

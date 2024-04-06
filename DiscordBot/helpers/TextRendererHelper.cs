@@ -1,8 +1,8 @@
-﻿using SixLabors.Fonts;
+﻿using BotShared;
+using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
-using SpecterAI.services;
 
 namespace SpecterAI.helpers
 {
@@ -40,7 +40,7 @@ namespace SpecterAI.helpers
         {
             if (text == null)
             {
-                await LoggingService.LogMessage(LogLevel.Error, $"[renderText] Text was null for some reason");
+                await Logger.LogMessage(LogLevel.Error, $"[renderText] Text was null for some reason");
                 return;
             }
 

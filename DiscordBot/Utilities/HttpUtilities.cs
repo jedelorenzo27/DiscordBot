@@ -1,5 +1,5 @@
 ﻿using Azure;
-using SpecterAI.services;
+using BotShared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +26,7 @@ namespace SpecterAI.Utilities
             Uri uriResult;
             if (!Uri.TryCreate(uri, UriKind.Absolute, out uriResult))
             {
-                await LoggingService.LogMessage(LogLevel.Error, $"[DownloadFileAsync] URI is invalid. Given URI: {uri}");
+                await Logger.LogMessage(LogLevel.Error, $"[DownloadFileAsync] URI is invalid. Given URI: {uri}");
                 throw new InvalidOperationException("URI is invalid.");
             }
             Console.WriteLine("URI seems valid");
@@ -65,7 +65,7 @@ namespace SpecterAI.Utilities
                     $"Failed to download webpage. Tried downloading from: {url}",
                     ex.Message
                 };
-                await LoggingService.LogMessage(LogLevel.Error, errorMessage);
+                await Logger.LogMessage(LogLevel.Error, errorMessage);
             }
             return "";
             

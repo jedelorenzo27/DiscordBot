@@ -16,5 +16,11 @@
         public string LeetcodeName { get; set; }
         public int LeetcodeNumber { get; set; }
         public LeetcodeDifficulty ChallengeDifficulty { get; set; }
+
+        override
+        public string ToString()
+        {
+            return $"ChallengeId:{ChallengeId},ServerId:{ServerId},CreationDate:{CreationDate},LeetcodeName:{LeetcodeName},LeetcodeNumber:{LeetcodeNumber}";
+        }
     }
 }

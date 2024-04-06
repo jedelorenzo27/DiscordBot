@@ -1,4 +1,5 @@
 ﻿using BotShared.models;
+using BotShared;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
@@ -18,7 +19,7 @@ namespace DiscordBot.commands
             Console.WriteLine("Shaming");
             await PermissionsService.ValidatePermissions(Context, Entitlement.Shame);
             await DeferAsync();
-            await LoggingService.LogCommandUse(Context, "shame");
+            await Logger.LogCommandUse(Context, "shame");
 
             ShameStats shameStats = await ShameTrainServices.GetShameStats(Context);
             List<string> messageLines = new List<string>()
@@ -67,7 +68,7 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.CreateChallenge);
             await DeferAsync();
-            await LoggingService.LogCommandUse(Context, "create-challenge");
+            await Logger.LogCommandUse(Context, "create-challenge");
             await ShameTrainServices.CreateDailyChallenge(Context, leetcodeURL, challengeName, int.Parse(challengeId));
             await DeleteOriginalResponseAsync();
         }
@@ -91,7 +92,7 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubmitChallenge);
             await DeferAsync();
-            await LoggingService.LogCommandUse(Context, "submit-challenge");
+            await Logger.LogCommandUse(Context, "submit-challenge");
 
             TimeComplexity timeComplexityResult = (TimeComplexity)Enum.Parse(typeof(TimeComplexity), timeComplexity);
             Language languageResult = (Language)Enum.Parse(typeof(Language), language);
@@ -130,7 +131,7 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubmitChallenge);
             await DeferAsync();
-            await LoggingService.LogCommandUse(Context, "submit-challenge");
+            await Logger.LogCommandUse(Context, "submit-challenge");
 
             TimeComplexity timeComplexityResult = (TimeComplexity)Enum.Parse(typeof(TimeComplexity), timeComplexity);
             Language languageResult = (Language)Enum.Parse(typeof(Language), language);
@@ -175,7 +176,7 @@ namespace DiscordBot.commands
         public async Task Subscribe()
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubscribeShameTrain);
-            await LoggingService.LogCommandUse(Context, "subscribe");
+            await Logger.LogCommandUse(Context, "subscribe");
             await ShameTrainServices.SubscribeUser(Context, Context.Guild.Id.ToString(), Context.User.Id.ToString());
             await RespondAsync($"Welcome aboard, {Context.User.Username}. The shame train arrives everyday Monday-Friday. The only way to ensure you're not on it is to complete #the-daily challenge and submit you're solution via /submit-challenge in the challenge thread. ");
         }
@@ -184,7 +185,7 @@ namespace DiscordBot.commands
         public async Task SubscribeOther(string userId)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.SubscribeOtherToShameTrain);
-            await LoggingService.LogCommandUse(Context, "subscribe");
+            await Logger.LogCommandUse(Context, "subscribe");
             await ShameTrainServices.SubscribeUser(Context, Context.Guild.Id.ToString(), userId);
             await RespondAsync($"Welcome aboard, {userId}. The shame train arrives everyday Monday-Friday. The only way to ensure you're not on it is to complete #the-daily challenge and submit you're solution via /submit-challenge in the challenge thread. ");
         }
@@ -198,7 +199,7 @@ namespace DiscordBot.commands
             ] int reason)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.UnsubscribeShameTrain);
-            await LoggingService.LogCommandUse(Context, "unsubscribe");
+            await Logger.LogCommandUse(Context, "unsubscribe");
             await ShameTrainServices.UnsubscribeUser(Context, Context.Guild.Id.ToString(), Context.User.Id.ToString());
             await RespondAsync($"Missing messages of shame. You're off the hook this time, {Context.User.Username}. Now get out of here you little scamp!");
         }
@@ -216,16 +217,21 @@ namespace DiscordBot.commands
         public async Task BackfillChallenge(int leetcodeNumber, string submittedUsers)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.BackfillChallenge);
-            await LoggingService.LogCommandUse(Context, "backfill-challenge");
+            await DeferAsync();
+            await Logger.LogCommandUse(Context, "backfill-challenge");
 
-            string[] submittedUsersSplit = new string[0];
-            if (submittedUsers.CompareTo("none") != 0 && submittedUsers.Contains(','))
+            string[] submittedUsersSplit = new string[1] { submittedUsers };
+            if (submittedUsers.Contains(','))
             {
                 submittedUsersSplit = submittedUsers.Split(',');
             }
 
-            await ShameTrainServices.BackfillChallenge(Context, leetcodeNumber, submittedUsersSplit);
-            await RespondAsync($"Done");
+            Action<MessageProperties> action = (x) => { x.Content = "Failed to backfill challenge. Check logs for more details."; };
+            if (await ShameTrainServices.BackfillChallenge(Context, leetcodeNumber, submittedUsersSplit))
+            {
+                action = (x) => { x.Content = "Done"; };
+            }
+            await ModifyOriginalResponseAsync(action);
         }
     }
 }

@@ -1,13 +1,9 @@
 ﻿using Discord;
 using Discord.Interactions;
 using SpecterAI.services;
-using DiscordBot.Utilities;
 using SpecterAI.Utilities;
-using Version = DiscordBot.Utilities.Version;
 using BotShared.models;
-using System.Threading.Channels;
-using System.Collections.Generic;
-using System.Linq;
+using BotShared;
 
 namespace DiscordBot.services
 {
@@ -48,7 +44,7 @@ namespace DiscordBot.services
                 challengeIdToSubmissions.Add(challenge.ChallengeId, (challenge, submissions));
             }
 
-            List<(string userId, int missedChallenges)> missedChallengeCounts = await CountChallengesSinceLastSubmission(challengeIdToSubmissions, currentSubscribers);
+            List<(string userId, int missedChallenges)> missedChallengeCounts = CountChallengesSinceLastSubmission(challengeIdToSubmissions, currentSubscribers);
             return new ShameStats()
             {
                 countSinceLastSubmission = missedChallengeCounts,
@@ -56,7 +52,7 @@ namespace DiscordBot.services
             };
         }
 
-        private static async Task<List<(string userId, int missedChallenges)>> CountChallengesSinceLastSubmission(Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions, List<ChallengeSubscriberModel> currentSubscribers)
+        private static List<(string userId, int missedChallenges)> CountChallengesSinceLastSubmission(Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions, List<ChallengeSubscriberModel> currentSubscribers)
         {
             List<(string userId, int missedChallenges)> missedChallengeCounts = new List<(string userId, int missedChallenges)>();
             int missedChallengeCount = 0;
@@ -91,18 +87,23 @@ namespace DiscordBot.services
             return result;
         }
 
+        private static async void SetChallengeThreadPermissions(SocketInteractionContext Context, string challengeId)
+        {
+            // Grant permissions - this will give everyone in the challenge thread the following permissions
+            await PermissionsService.GrantPermission(Context, challengeId, Entitlement.SubmitChallenge);
+            await PermissionsService.GrantPermission(Context, challengeId, Entitlement.VerifySubmission);
+            await PermissionsService.GrantPermission(Context, challengeId, Entitlement.ViewChallengeSubmissions);
+            await PermissionsService.GrantPermission(Context, challengeId, Entitlement.SubscribeShameTrain);
+            await PermissionsService.GrantPermission(Context, challengeId, Entitlement.UnsubscribeShameTrain);
+        }
 
-        public static async Task BackfillChallenge(SocketInteractionContext Context, int leetcodeNumber, string[] userIdsWithSubmissions)
+        public static async Task<bool> BackfillChallenge(SocketInteractionContext Context, int leetcodeNumber, string[] userIdsWithSubmissions)
         {
             string leetcodeName = Context.Channel.Name;
             leetcodeName = leetcodeName.Substring(leetcodeName.IndexOf(' '));
 
             // Grant permissions - this will give everyone in the challenge thread the following permissions
-            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.SubmitChallenge);
-            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.VerifySubmission);
-            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.ViewChallengeSubmissions);
-            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.SubscribeShameTrain);
-            await PermissionsService.GrantPermission(Context, Context.Channel.Id.ToString(), Entitlement.UnsubscribeShameTrain);
+            SetChallengeThreadPermissions(Context, Context.Channel.Id.ToString());
 
             // Store challenge details in db
             ChallengeModel challenge = new ChallengeModel()
@@ -113,11 +114,23 @@ namespace DiscordBot.services
                 LeetcodeName = leetcodeName,
                 LeetcodeNumber = leetcodeNumber
             };
-            await Program._challengeRepo.AddChallenge(challenge);
+            int rowsAffected = await Program._challengeRepo.AddChallenge(challenge);
 
-            foreach(string userId in userIdsWithSubmissions)
+            if (rowsAffected > 0)
             {
-                await SubmitSolution(Context, userId, null, Language.Unknown, TimeComplexity.Unknown);
+                await Logger.LogMessage(LogLevel.Info, $"Successfully stored challenge:{challenge}");
+                foreach (string userId in userIdsWithSubmissions)
+                {
+                    if (userId.Length > 15)
+                    {
+                        await SubmitSolution(Context, userId, null, Language.Unknown, TimeComplexity.Unknown);
+                    }
+                }
+                await Logger.LogMessage(LogLevel.Info, $"Successfully stored {userIdsWithSubmissions} to challenge");
+                return true;
+            } else
+            {
+                return false;
             }
         }
 
@@ -145,11 +158,8 @@ namespace DiscordBot.services
             await newThread.SendMessageAsync($"{string.Join(",", userMentions)}");
 
             // Grant permissions - this will give everyone in the challenge thread the following permissions
-            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubmitChallenge);
-            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.VerifySubmission);
-            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.ViewChallengeSubmissions);
-            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.SubscribeShameTrain);
-            await PermissionsService.GrantPermission(Context, newThread.Id.ToString(), Entitlement.UnsubscribeShameTrain);
+            SetChallengeThreadPermissions(Context, Context.Channel.Id.ToString());
+
 
             // Store challenge details in db
             ChallengeModel challenge = new ChallengeModel()
