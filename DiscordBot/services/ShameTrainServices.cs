@@ -10,6 +10,7 @@ namespace BotShared.services
     public class ShameStats
     {
         public List<(string userId, int missedChallenges)> countSinceLastSubmission;
+        public List<(string userId, int submissionStreak)> consecutiveSubmissionCount;
         public int totalChallenges;
     }
 
@@ -24,7 +25,7 @@ namespace BotShared.services
 
             List<ChallengeSubscriberModel> currentSubscribers = await Program._challengeSubscriberRepo.GetSubscribersByDiscordId(Context.Guild.Id.ToString());
 
-            Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions = new Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)>();
+            List<(ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions = new List<(ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)>();
             foreach (ChallengeModel challenge in challenges)
             {
                 HashSet<string> seenUserIds = new HashSet<string>();
@@ -41,25 +42,61 @@ namespace BotShared.services
                         seenUserIds.Add(submissions[i].UserId);
                     }
                 }
-                challengeIdToSubmissions.Add(challenge.ChallengeId, (challenge, submissions));
+                challengeIdToSubmissions.Add((challenge, submissions));
             }
 
             List<(string userId, int missedChallenges)> missedChallengeCounts = CountChallengesSinceLastSubmission(challengeIdToSubmissions, currentSubscribers);
+            List<(string userId, int submissionStrea)> submissionStreak = new List<(string userId, int submissionStrea)>();
+
+            while (missedChallengeCounts.Count > 0 && missedChallengeCounts[0].missedChallenges == 0)
+            {
+                (string userId, int missedChallenges) tailInfo = missedChallengeCounts[0];
+                submissionStreak.Add((tailInfo.userId, CountSubmissionStreak(challengeIdToSubmissions, tailInfo.userId)));
+                missedChallengeCounts.RemoveAt(0);
+            }
+
             return new ShameStats()
             {
                 countSinceLastSubmission = missedChallengeCounts,
+                consecutiveSubmissionCount = submissionStreak,
                 totalChallenges = challenges.Count,
             };
         }
 
-        private static List<(string userId, int missedChallenges)> CountChallengesSinceLastSubmission(Dictionary<string, (ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions, List<ChallengeSubscriberModel> currentSubscribers)
+        private static int CountSubmissionStreak(List<(ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions, string userId)
+        {
+            int consecutiveChallengeCount = -1;
+            for (int i = 0; i < challengeIdToSubmissions.Count; i++)
+            //for (int i = challengeIdToSubmissions.Count - 1; i >= 0; i--)
+            {
+                if (!HasSubmissionForUser(userId, challengeIdToSubmissions[i].submissions)) {
+                    return consecutiveChallengeCount;
+                }
+                consecutiveChallengeCount++;
+            }
+            return consecutiveChallengeCount;
+        }
+
+        private static bool HasSubmissionForUser(string userId, List<ChallengeSubmissionModel> submissions)
+        {
+            foreach(ChallengeSubmissionModel submission in submissions)
+            {
+                if (submission.UserId == userId)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static List<(string userId, int missedChallenges)> CountChallengesSinceLastSubmission(List<(ChallengeModel challenge, List<ChallengeSubmissionModel> submissions)> challengeIdToSubmissions, List<ChallengeSubscriberModel> currentSubscribers)
         {
             List<(string userId, int missedChallenges)> missedChallengeCounts = new List<(string userId, int missedChallenges)>();
             int missedChallengeCount = 0;
             HashSet<string> subscribers = SubscribersModelToIdSet(currentSubscribers);
-            foreach (string challengeId in challengeIdToSubmissions.Keys)
+            foreach ((ChallengeModel challenge, List<ChallengeSubmissionModel> submissions) challengeSubmissions in challengeIdToSubmissions)
             {
-                foreach (ChallengeSubmissionModel submission in challengeIdToSubmissions[challengeId].submissions)
+                foreach (ChallengeSubmissionModel submission in challengeSubmissions.submissions)
                 {
                     if (subscribers.Contains(submission.UserId))
                     {

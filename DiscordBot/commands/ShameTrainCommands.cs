@@ -42,13 +42,22 @@ namespace BotShared.commands
             }
             messageLines.Add("---------------------------------");
 
-            if (countSinceLastSubmission.Count > 0)
+            if (shameStats.consecutiveSubmissionCount.Count > 0)
             {
                 messageLines.Add("The following users are SAFE. Great job out there!");
-                while (countSinceLastSubmission.Count > 0)
+                foreach((string userId, int submissionStreak) entry in shameStats.consecutiveSubmissionCount)
                 {
-                    messageLines.Add($"<@{countSinceLastSubmission[0].userId}>");
-                    countSinceLastSubmission.RemoveAt(0);
+                    if (entry.submissionStreak == 0)
+                    {
+                        messageLines.Add($"<@{entry.userId}>");
+                    }
+                    else if (entry.submissionStreak == 1)
+                    {
+                        messageLines.Add($"<@{entry.userId}> second challenge in a row, nice! ");
+                    } else
+                    {
+                        messageLines.Add($"<@{entry.userId}> is on a {entry.submissionStreak+1} challenge streak!!! Keep it going!");
+                    }
                 }
             } else
             {
@@ -102,6 +111,28 @@ namespace BotShared.commands
             List<string> responseLines = new List<string>
             {
                 $"Thanks for the submission, <@{Context.User.Id}>! You're probably safe from the Shame Train... for now",
+                $"Solution completes in O({EnumExtensions.ToDescriptionString(timeComplexityResult)})"
+            };
+
+            Action<MessageProperties> action = (x) => { x.Content = string.Join("\n", responseLines.ToArray()); };
+            await ModifyOriginalResponseAsync(action);
+        }
+
+        [SlashCommand("submit-challenge-other", "Submit daily-challenge solution")]
+        public async Task SubmitSolutionOther(string userId)
+        {
+            await PermissionsService.ValidatePermissions(Context, Entitlement.SubmitChallenge);
+            await DeferAsync();
+            await Logger.LogCommandUse(Context, "submit-challenge");
+
+            TimeComplexity timeComplexityResult = TimeComplexity.Constant;
+            Language languageResult = Language.CSharp;
+
+            string[] solutionLines = await ShameTrainServices.SubmitSolution(Context, userId, null, languageResult, timeComplexityResult);
+
+            List<string> responseLines = new List<string>
+            {
+                $"Thanks for the submission, <@{userId}>! You're probably safe from the Shame Train... for now",
                 $"Solution completes in O({EnumExtensions.ToDescriptionString(timeComplexityResult)})"
             };
 

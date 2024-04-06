@@ -12,6 +12,8 @@ namespace BotShared.models
         // Currently limited to length of 50 characters
         [Description("Admin Privileges")]
         Admin,
+        [Description("Admin Privileges for deleting data")]
+        AdminDeleteData,
         [Description("Grant Permission")]
         GrantPermission,
         [Description("Remove Permission")]

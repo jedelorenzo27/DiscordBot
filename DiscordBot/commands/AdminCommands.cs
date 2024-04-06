@@ -26,7 +26,7 @@ namespace BotShared.commands
         [SlashCommand("admin-delete-all", "Deletes all db data")]
         public async Task DeleteDbData()
         {
-            await PermissionsService.ValidatePermissions(Context, Entitlement.Admin);
+            await PermissionsService.ValidatePermissions(Context, Entitlement.AdminDeleteData);
             await DeferAsync();
 
             await Program._adminRepo.DeleteAllData();
