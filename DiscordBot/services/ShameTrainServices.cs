@@ -5,7 +5,7 @@ using SpecterAI.Utilities;
 using BotShared.models;
 using BotShared;
 
-namespace DiscordBot.services
+namespace BotShared.services
 {
     public class ShameStats
     {

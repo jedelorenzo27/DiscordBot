@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DiscordBot.Properties {
+namespace BotShared.Properties {
     using System;
     
     

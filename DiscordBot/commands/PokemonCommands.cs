@@ -9,8 +9,9 @@ using System.Collections.Generic;
 using SpecterAI.services;
 using System.Diagnostics;
 using SpecterAI.Utilities;
-using DiscordBot.Utilities;
+using BotShared.Utilities;
 using BotShared.models;
+using BotShared;
 
 namespace SpecterAI.commands
 {

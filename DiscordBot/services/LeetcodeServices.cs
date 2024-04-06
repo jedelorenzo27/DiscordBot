@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.services
+namespace BotShared.services
 {
     public static class TwoDIntArrayToCodeLines
     {

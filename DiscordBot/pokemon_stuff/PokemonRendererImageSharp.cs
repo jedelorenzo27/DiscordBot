@@ -1,4 +1,5 @@
-﻿using DiscordBot.Utilities;
+﻿using BotShared;
+using BotShared.Utilities;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;

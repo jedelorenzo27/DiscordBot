@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
-using DiscordBot.services;
-using DiscordBot.Utilities;
+using BotShared.services;
+using BotShared.Utilities;
 using SixLabors.ImageSharp.PixelFormats;
 using SpecterAI.Utilities;
 using System;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.commands
+namespace BotShared.commands
 {
     public class LeetcodeCommands : InteractionModuleBase<SocketInteractionContext>
     {

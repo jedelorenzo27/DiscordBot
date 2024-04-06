@@ -1,7 +1,7 @@
 ﻿using BotShared.models;
 using Discord;
 using Discord.Interactions;
-using DiscordBot.Utilities;
+using BotShared.Utilities;
 using SpecterAI.services;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.commands
+namespace BotShared.commands
 {
     public class AdminCommands : InteractionModuleBase<SocketInteractionContext>
     {

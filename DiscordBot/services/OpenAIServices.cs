@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
-using DiscordBot.Utilities;
+using BotShared.Utilities;
 using Newtonsoft.Json;
 using SpecterAI.Utilities;
 using System;
@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using BotShared;
 
 namespace SpecterAI.services
 {

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.services.azure_services
+namespace BotShared.services.azure_services
 {
     internal class AzureKeyValutKeys
     {

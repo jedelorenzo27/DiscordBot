@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Utilities
+namespace BotShared.Utilities
 {
     public class Version
     {

@@ -8,13 +8,13 @@ using SummaryAttribute = Discord.Commands.SummaryAttribute;
 using SpecterAI.pokemonStuff;
 using SpecterAI.services;
 using System.Net;
-using DiscordBot.services;
-using DiscordBot;
+using BotShared.services;
+using BotShared;
 using System.Data.Common;
 using BotDataAccess;
 using Microsoft.Data.SqlClient;
 using BotDataAccess.repositories;
-using DiscordBot.Utilities;
+using BotShared.Utilities;
 using BotShared.models;
 using BotShared;
 

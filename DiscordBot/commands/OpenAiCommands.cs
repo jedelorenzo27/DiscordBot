@@ -1,7 +1,6 @@
 ﻿using BotShared.models;
 using Discord;
 using Discord.Interactions;
-using DiscordBot.Utilities;
 using SpecterAI.services;
 using SpecterAI.Utilities;
 using System;
@@ -10,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BotShared;
 
 namespace SpecterAI.commands
 {

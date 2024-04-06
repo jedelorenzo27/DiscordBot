@@ -1,7 +1,7 @@
 ﻿using BotShared;
 using BotShared.models;
 using Discord.Interactions;
-using DiscordBot.Utilities;
+using BotShared.Utilities;
 using SpecterAI.Utilities;
 
 namespace SpecterAI.services

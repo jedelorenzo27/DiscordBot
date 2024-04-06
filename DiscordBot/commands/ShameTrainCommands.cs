@@ -3,12 +3,12 @@ using BotShared;
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
-using DiscordBot.services;
+using BotShared.services;
 using SpecterAI.services;
 using SpecterAI.Utilities;
 using System.Security;
 
-namespace DiscordBot.commands
+namespace BotShared.commands
 {
     public class ShameTrainCommands : InteractionModuleBase<SocketInteractionContext>
     {

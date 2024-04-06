@@ -1,7 +1,7 @@
 ﻿using BotShared;
 using Discord;
 using Discord.Interactions;
-using DiscordBot.Utilities;
+using BotShared.Utilities;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SpecterAI.pokemonStuff;

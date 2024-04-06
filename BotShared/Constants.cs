@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordBot.Utilities
+namespace BotShared
 {
     public static class Constants
     {
-        public static Version BotVersion = new Version(1,0,2);
+        public static Version BotVersion = new Version(1,0,3);
 
 
         public static ulong ByteLordzCringeCave_Role_Unemployed = 1211510658282164315;

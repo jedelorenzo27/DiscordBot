@@ -1,4 +1,4 @@
-﻿using DiscordBot.services.azure_services;
+﻿using BotShared.services.azure_services;
 using Microsoft.Extensions.Configuration;
 
 public static class SecretsHandler
