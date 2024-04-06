@@ -184,8 +184,8 @@ namespace DiscordBot.services
 
         public static async Task<string[]> SubmitSolution(SocketInteractionContext Context, string UserId, Attachment solution, Language language, TimeComplexity timeComplexity)
         {
-            await SubscribeUser(Context, Context.Channel.Id.ToString(), Context.User.Id.ToString());
-            await SubscribeUser(Context, Context.Guild.Id.ToString(), Context.User.Id.ToString());
+            await SubscribeUser(Context, Context.Channel.Id.ToString(), UserId);
+            await SubscribeUser(Context, Context.Guild.Id.ToString(), UserId);
             List<string> lines = new List<string>();
             if (solution != null)
             {
@@ -198,7 +198,7 @@ namespace DiscordBot.services
                     }
                 }
             }
-            await Program._challengeSubmissionRepo.AddSubmission(Context.Channel.Id.ToString(), Context.User.Id.ToString(), timeComplexity, language, DateTime.Now);
+            await Program._challengeSubmissionRepo.AddSubmission(Context.Channel.Id.ToString(), UserId, timeComplexity, language, DateTime.Now);
             return lines.ToArray();
         }
 

@@ -66,7 +66,6 @@ public class Program
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.SubscribeShameTrain);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.SubscribeOtherToShameTrain);
         await _entitlementRepo.AddEntitlement(Constants.JonathanUserId, Entitlement.GrantPermission);
-
         
         // This sets up the bot's basic settings.
         // By choosing "GatewayIntents.All", we're asking to get all types of updates from Discord,

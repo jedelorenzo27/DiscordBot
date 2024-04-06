@@ -217,7 +217,14 @@ namespace DiscordBot.commands
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.BackfillChallenge);
             await LoggingService.LogCommandUse(Context, "backfill-challenge");
-            await ShameTrainServices.BackfillChallenge(Context, leetcodeNumber, submittedUsers.Split(','));
+
+            string[] submittedUsersSplit = new string[0];
+            if (submittedUsers.CompareTo("none") != 0 && submittedUsers.Contains(','))
+            {
+                submittedUsersSplit = submittedUsers.Split(',');
+            }
+
+            await ShameTrainServices.BackfillChallenge(Context, leetcodeNumber, submittedUsersSplit);
             await RespondAsync($"Done");
         }
     }
