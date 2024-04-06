@@ -31,39 +31,11 @@ namespace DiscordBot.Utilities
         public static string OutputDirectory = $"{getRootDirectory()}{slash}output{slash}";
         public static string TempDirectory = $"{OutputDirectory}temp{slash}";
 
-        // LoggingService:
-        public static string DebugChannelsFile = $"{ResourceDirectory}logging{slash}debug_channels.txt";
-
-        // Permission:
         public static string DevLogsChannelId = "1103512627675672608";
         public static string JayUserId = "222127402980081667";
         public static string JonathanUserId = "429310221861519374";
-        public static string ChrisUserId = "447113923162800148";
-        public static string BasePermissionPath = $"{ResourceDirectory}permissions{slash}";
-        public static string PermissionsFileName = $"permissions.txt";
-        public static string PermissionsFilePath = $"{BasePermissionPath}{PermissionsFileName}";
-        public static string BannedUsersFileName = $"banned_users.txt";
-        public static string BannedUsersFilePath = $"{BasePermissionPath}{BannedUsersFilePath}";
-        public static string UserMetadataFileName = $"user_metadata.txt";
-        public static string UserMetadataFilePath = $"{BasePermissionPath}{UserMetadataFileName}";
-
-        // Shame train
-        public static string ShameTrainChallengeDetailsFileName = "challengeDetails.txt";
-        public static string ShameTrainChallengeDetailsFileNameDelimiter = "==";
-        public static string ShameTrainSubscribedUsersFileName = "subscribed_users.txt";
-        public static string ShameTrainSubscribedUsersFilePath = $"{ResourceDirectory}shame_train{slash}{ShameTrainSubscribedUsersFileName}";
-        public static string ShameTrainSubscribedUsersFileDelimiter = ",";
-        public static string ShameTrainChallengeDirectory = $"{ResourceDirectory}shame_train{slash}challenges{slash}";
-        public static string ShameTrainChallengeSolutionFolderName = $"solutions";
-        public static string ShameTrainChallengeSolutionDirectory = $"{ShameTrainChallengeSolutionFolderName}{slash}";
+        public static string ChrisUserId = "447113923162800148";        
         
-        
-        // ShameTrain Metadata Fields
-        public const string ChallengeName = "ChallengeName";
-        public const string ChallengeId = "ChallengeId";
-        public const string ChallengeDate = "ChallengeDate";
-        public const string ChallengeVersion = "version";
-
         // Pokemon
         public static string FontDirectory = $"{ResourceDirectory}fonts{slash}";
         public static string PokemonPortraitsDirectory = $"{OutputDirectory}pokemon_portraits{slash}";

@@ -170,13 +170,6 @@ namespace DiscordBot.services
             }
         }
 
-        public static async Task<bool> VerifySubmission(ulong challengeId, ulong userId)
-        {
-            DirectoryInfo taskDirectory = new DirectoryInfo($"{Constants.ShameTrainChallengeDirectory}{challengeId}{Constants.slash}");
-            FileInfo[] taskFiles = taskDirectory.GetFiles($"{userId}*");
-            return taskFiles.Length > 0;
-        }
-
         public static async Task<string[]> SubmitSolution(SocketInteractionContext Context, Attachment solution, Language language, TimeComplexity timeComplexity)
         {
             return await SubmitSolution(Context, Context.User.Id.ToString(), solution, language, timeComplexity);
