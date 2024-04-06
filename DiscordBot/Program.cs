@@ -57,6 +57,7 @@ public class Program
 
         //string devChannel = "1103512627675672608";
         //string devServer = "806901327120039947";
+        await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.Admin);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.GrantPermission);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.RemovePermission);
         await _entitlementRepo.AddEntitlement(Constants.JayUserId, Entitlement.CreateChallenge);

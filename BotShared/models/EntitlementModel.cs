@@ -10,6 +10,8 @@ namespace BotShared.models
     public enum Entitlement
     {
         // Currently limited to length of 50 characters
+        [Description("Admin Privileges")]
+        Admin,
         [Description("Grant Permission")]
         GrantPermission,
         [Description("Remove Permission")]
@@ -46,6 +48,7 @@ namespace BotShared.models
         UnsubscribeShameTrain,
         [Description("View Challenge Submissions")]
         ViewChallengeSubmissions
+
     }
 
     public class EntitlementModel
