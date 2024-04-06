@@ -69,7 +69,7 @@ namespace SpecterAI.services
                 {
                     try
                     {
-                        await sendMessageToChannel(ulong.Parse(channelId), $"[{level}]{message}", localOnly);
+                        await sendMessageToChannel(ulong.Parse(channelId), $"[{level}] {message}", localOnly);
                     } catch (Exception ex)
                     {
                         Console.WriteLine($"Failed to send log message to discord channel ({channelId})");
@@ -87,7 +87,7 @@ namespace SpecterAI.services
         private static async Task sendMessageToChannel(ulong channelId, string message, bool localOnly)
         {
             Console.WriteLine(message);
-            if (localOnly)
+            if (!localOnly)
             {
                 var chnl = _discord.GetChannel(channelId) as IMessageChannel;
                 await chnl.SendMessageAsync(message);

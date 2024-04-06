@@ -124,9 +124,6 @@ public class Program
         _client.Ready += Client_Ready;
 
         // Prepare logging service. Any logs sent before here will be printed to console but not sent to discord.
-        LoggingService.LoadLoggingServers(_client);
-
-        await LoggingService.LogMessage(LogLevel.Info, $"Starting bot with version: {Constants.BotVersion}"); ;
 
         // Block this task until the program is closed.
         await Task.Delay(-1);
@@ -139,6 +136,8 @@ public class Program
     {
         // Register slash commands
         await _interactions.RegisterCommandsGloballyAsync();
+        LoggingService.LoadLoggingServers(_client);
+        await LoggingService.LogMessage(LogLevel.Info, $"Starting bot with version: {Constants.BotVersion}"); ;
     }
 
     // Handles non-slash commands
