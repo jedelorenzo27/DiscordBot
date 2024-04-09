@@ -195,7 +195,7 @@ namespace BotShared.services
             await newThread.SendMessageAsync($"{string.Join(",", userMentions)}");
 
             // Grant permissions - this will give everyone in the challenge thread the following permissions
-            SetChallengeThreadPermissions(Context, Context.Channel.Id.ToString());
+            SetChallengeThreadPermissions(Context, newThread.Id.ToString());
 
 
             // Store challenge details in db
