@@ -136,7 +136,6 @@ namespace SpecterAI.pokemonStuff
             renderRetreatCost(image, definition);
             await renderIllustrator(image, definition);
             renderRarity(image, definition);
-
         }
 
         private string getBackgroundImage(PokemonDefinition definition)
@@ -265,7 +264,7 @@ namespace SpecterAI.pokemonStuff
             {
                 RectangleF boundingBox = getBoundingBox(image, 11.75f, 12.5f, 87.75f, 51.25f);
                 portrait.Mutate(o => o.Resize(new Size((int)boundingBox.Width, (int)boundingBox.Height)));
-                image.Mutate(o => o.DrawImage(portrait, new Point((int)boundingBox.X, (int)boundingBox.Y), 1f));
+                image.Mutate(o => o.DrawImage(portrait, new Point((int)boundingBox.X, (int)boundingBox.Y), 1f));            
             }
         }
 

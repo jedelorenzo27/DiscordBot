@@ -221,7 +221,7 @@ namespace SpecterAI
 
         private async Task GetPokemonDescription(SocketInteractionContext context, PokemonDefinition definition, Conversation conversation)
         {
-            conversation.addMessage(MessageRole.USER, $"Imagine a we're creating a new pokemon named {definition.name}.");
+            conversation.addMessage(MessageRole.USER, $"Imagine we're creating a new pokemon named {definition.name}.");
             conversation.addMessage(MessageRole.USER, "Describe what this new pokemon would look like.");
             string description = await OpenAIServices.Chat(conversation);
             conversation.addMessage(MessageRole.SYSTEM, description);
@@ -256,8 +256,10 @@ namespace SpecterAI
             PokemonType? possibleType = ExtractMostReferencedPokemonType(pokemonWeaknessResponse, new HashSet<PokemonType>() { definition.type});
             if (possibleType != null)
             {
-                definition.weaknesses = new HashSet<PokemonType>();
-                definition.weaknesses.Add((PokemonType)possibleType);
+                definition.weaknesses = new HashSet<PokemonType>
+                {
+                    (PokemonType)possibleType
+                };
                 definition.weaknessStrength = PokemonDefinition.WeaknessStrengths[random.Next(PokemonDefinition.WeaknessStrengths.Length - 1)];
             }
             else
@@ -404,8 +406,8 @@ namespace SpecterAI
             string imagePrompt = $"Imagine a newly discovered pokemon named {definition.name}. It is described as follows: '{definition.description}' in it's natural habitat. Add a nice nature scene to background. DO NOT ADD TEXT!";
             imagePrompt += $"This pokemon weighs {definition.weight}. ";
             imagePrompt += $"This pokemon is {definition.type} type. ";
-            definition.portraitFileName = $"{definition.name}_temp.png";
-            await OpenAIServices.Image(imagePrompt, Constants.RenderedPokemonCardsDirectory, definition.portraitFileName);
+            definition.portraitFileName = $"{definition.name}{Constants.PokemonPortraitFileSuffix}.png";
+            await OpenAIServices.Image(imagePrompt, Constants.PokemonPortraitsDirectory, definition.portraitFileName);
             
         }
 

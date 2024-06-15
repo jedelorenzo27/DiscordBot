@@ -40,5 +40,7 @@ namespace BotShared
         public static string FontDirectory = $"{ResourceDirectory}fonts{slash}";
         public static string PokemonPortraitsDirectory = $"{OutputDirectory}pokemon_portraits{slash}";
         public static string RenderedPokemonCardsDirectory = $"{OutputDirectory}pokemon_cards{slash}";
+
+        public static string PokemonPortraitFileSuffix = "_portrait";
     }
 }

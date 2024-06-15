@@ -19,8 +19,8 @@ namespace SpecterAI.commands
     {
         public InteractionService Service { get; set; }
 
-        [SlashCommand("pokemon2", "Does nothing")]
-        public async Task PokemonHello(string name)
+        [SlashCommand("pokemon", "Generates a pokemon card")]
+        public async Task Pokemon(string name)
         {
             await PermissionsService.ValidatePermissions(Context, Entitlement.Pokemon);
 
@@ -30,7 +30,9 @@ namespace SpecterAI.commands
             await DeferAsync();
 
             PokemonGenerator generator = new PokemonGenerator();
+            
             PokemonDefinition definition = await generator.generateAiPokemonDefinition(Context, name);
+            //PokemonDefinition definition = generator.getTestDefinition();
 
             PokemonRendererImageSharp renderer = new PokemonRendererImageSharp();
             await renderer.createTestPokemonCard(definition);
@@ -39,10 +41,8 @@ namespace SpecterAI.commands
             LinkedList<FileAttachment> list = new LinkedList<FileAttachment>();
             list.AddFirst(renderedCard);
             Action<MessageProperties> action = (x) => { x.Attachments = list; x.Content = "done"; };
-            //await ModifyOriginalResponseAsync(action);
             await FollowupWithFilesAsync(list);
             stopwatch.Stop();
-            //await FollowupAsync("Completed in " + stopwatch.ElapsedMilliseconds / 1000.0f + " seconds.");
         }
     }
 }
