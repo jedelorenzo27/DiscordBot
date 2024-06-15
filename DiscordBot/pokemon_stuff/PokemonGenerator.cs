@@ -205,7 +205,7 @@ namespace SpecterAI
                 await GetPortrait(context, definition, conversation);
                 await updateStatus(context, generationStep, totalSteps, updateLogs, "");
 
-                definition.illustrator = "TODO: Random name generator";
+                definition.illustrator = "Jason Cole";
             }
             catch (Exception e)
             {
@@ -320,7 +320,7 @@ namespace SpecterAI
         {
             definition.moveset = new List<PokemonAttack>();
             definition.moveset.Add(await (GetPokemonAttack(context, random,  definition, conversation)));
-            if (random.Next(10) > 5)
+            if (random.Next(10) > 3)
             {
                 definition.moveset.Add(await (GetPokemonAttack(context, random, definition, conversation)));
             }
@@ -375,21 +375,16 @@ namespace SpecterAI
         private async Task GetRarity(SocketInteractionContext context, Random random, PokemonDefinition definition, Conversation conversation)
         {
             List<CardRarity> rarityList = new List<CardRarity>();
-            for(int i = 0; i < 70; i++)
+            if (random.Next(100) > 95)
             {
-                rarityList.Add(CardRarity.COMMON);
-            }
-
-            for (int i = 0; i < 25; i++)
+                definition.rarity = CardRarity.RARE;
+            } else if (random.Next(100) > 75)
             {
-                rarityList.Add(CardRarity.UNCOMMON);
-            }
-
-            for (int i = 0; i < 5; i++)
+                definition.rarity = CardRarity.UNCOMMON;
+            } else
             {
-                rarityList.Add(CardRarity.RARE);
+                definition.rarity = CardRarity.COMMON;
             }
-            definition.rarity = rarityList[random.Next(rarityList.Count-1)];
         }
 
         private async Task GetFlavorText(SocketInteractionContext context, PokemonDefinition definition, Conversation conversation)

@@ -141,6 +141,11 @@ namespace SpecterAI.pokemonStuff
         private string getBackgroundImage(PokemonDefinition definition)
         {
             string backgroundPath = Constants.ResourceDirectory + @"pokemon\CardBlanks\";
+            if (Constants.UseHiResolutionBlanks)
+            {
+                backgroundPath = Constants.ResourceDirectory + @"pokemon\CardBlanks_Hi_Res\";
+            }
+
             switch (definition.type)
             {
                 case PokemonType.ELECTRIC:

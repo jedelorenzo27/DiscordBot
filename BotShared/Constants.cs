@@ -34,9 +34,11 @@ namespace BotShared
         public static string DevLogsChannelId = "1103512627675672608";
         public static string JayUserId = "222127402980081667";
         public static string JonathanUserId = "429310221861519374";
-        public static string ChrisUserId = "447113923162800148";        
-        
+        public static string ChrisUserId = "447113923162800148";
+
         // Pokemon
+        public static bool UseHiResolutionBlanks = true;
+
         public static string FontDirectory = $"{ResourceDirectory}fonts{slash}";
         public static string PokemonPortraitsDirectory = $"{OutputDirectory}pokemon_portraits{slash}";
         public static string RenderedPokemonCardsDirectory = $"{OutputDirectory}pokemon_cards{slash}";
