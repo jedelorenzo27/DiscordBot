@@ -8,7 +8,7 @@ namespace BotShared
 {
     public static class Constants
     {
-        public static Version BotVersion = new Version(1,0,4);
+        public static Version BotVersion = new Version(1,0,5);
 
 
         public static ulong ByteLordzCringeCave_Role_Unemployed = 1211510658282164315;
