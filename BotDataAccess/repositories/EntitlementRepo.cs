@@ -1,14 +1,9 @@
 ﻿using BotShared;
 using BotShared.models;
 using Dapper;
-using Discord;
-using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
+using MySqlConnector;  
+
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BotDataAccess.repositories
 {
@@ -18,7 +13,7 @@ namespace BotDataAccess.repositories
 
         public EntitlementRepo(string connectionString)
         {
-            _db = new SqlConnection(connectionString);
+            _db = new MySqlConnection(connectionString);
         }
 
         public async Task<List<EntitlementModel>> GetEntitlementsById(string id) 

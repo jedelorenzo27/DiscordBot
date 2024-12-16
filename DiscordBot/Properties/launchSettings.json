@@ -1,10 +1,7 @@
 {
   "profiles": {
     "DiscordBot": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      "commandName": "Project"
     }
   }
 }

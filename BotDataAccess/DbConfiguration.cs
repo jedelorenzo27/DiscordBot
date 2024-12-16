@@ -1,13 +1,4 @@
-﻿using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using DbUp;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace BotDataAccess
 {
@@ -26,22 +17,10 @@ namespace BotDataAccess
 
         public static string GetDatabaseConnectionString(IConfiguration configuration)
         {
-            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-            if (environmentName == "Development")
-            {
-                return configuration.GetConnectionString("DefaultConnection");
-            }
-            else
-            {
-                var keyVaultBaseUrl = configuration["AzureKeyVault:BaseUrl"];
-                var secretName = "DbConnString";
 
-                var client = new SecretClient(new Uri(keyVaultBaseUrl), new DefaultAzureCredential());
-                var secret = client.GetSecret(secretName);
+            return configuration.GetConnectionString("DefaultConnection");
 
-                return secret.Value.Value;
-            }
         }
 
         public static void InitializeDatabase(IConfiguration configuration)
@@ -51,7 +30,7 @@ namespace BotDataAccess
 
             Console.WriteLine("Database connection string retrieved successfully.");
 
-            var upgrader = DeployChanges.To
+            /*var upgrader = DeployChanges.To
                 .SqlDatabase(connectionString)
                 .WithScriptsEmbeddedInAssembly(
                     Assembly.GetExecutingAssembly(),
@@ -65,7 +44,7 @@ namespace BotDataAccess
             {
                 Console.WriteLine($"An error occurred while updating the database: {result.Error}");
                 return;
-            }
+            }*/
 
             Console.WriteLine("Database updated successfully.");
         }

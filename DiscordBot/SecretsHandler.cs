@@ -15,29 +15,12 @@ public static class SecretsHandler
             .AddEnvironmentVariables();
 
         Configuration = builder.Build();
-
-        var secretsSource = Configuration["SecretsSource"];
-
-        if (secretsSource == "AzureKeyVault")
-        {
-            var keyVaultBaseUrl = Configuration["AzureKeyVault:BaseUrl"];
-            azureSecretsService = new AzureKeyVaultSecrets(keyVaultBaseUrl);
-        }
     }
 
     private static async Task<string> GetSecretAsync(string key)
     {
-        if (azureSecretsService != null)
-        {
-            // If AzureKeyVaultSecrets service is initialized, fetch secrets from Azure Key Vault
-            return await azureSecretsService.GetSecretAsync(key);
-        }
-        else
-        {
-            // For "Local" SecretsSource, retrieve the value directly from configuration
-            var localKey = Configuration[$"LocalSecrets:{key}"];
-            return localKey;
-        }
+        var localKey = Configuration[$"Secrets:{key}"];
+        return localKey;
     }
 
     public static async Task<string> DiscordToken() => await GetSecretAsync("DiscordToken");

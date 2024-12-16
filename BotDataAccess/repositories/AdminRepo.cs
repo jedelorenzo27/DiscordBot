@@ -1,12 +1,6 @@
-﻿using BotShared.models;
-using Dapper;
-using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
+﻿using Dapper;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MySqlConnector;
 
 namespace BotDataAccess.repositories
 {
@@ -16,7 +10,7 @@ namespace BotDataAccess.repositories
 
         public AdminRepo(string connectionString)
         {
-            _db = new SqlConnection(connectionString);
+            _db = new MySqlConnection(connectionString);
         }
 
         public async Task DeleteAllData()

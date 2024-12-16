@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Channels;
-using System.Threading.Tasks;
+﻿using System.Data;
 using BotShared;
 using BotShared.models;
 using Dapper;
-using Microsoft.Data.SqlClient;
+using MySqlConnector;
 
 namespace BotDataAccess.repositories
 {
@@ -18,7 +12,7 @@ namespace BotDataAccess.repositories
 
         public ChallengeRepo(string connectionString)
         {
-            _db = new SqlConnection(connectionString);
+            _db = new MySqlConnection(connectionString);
         }
 
         public async Task<List<ChallengeModel>> GetChallengesByServerId(string serverId)

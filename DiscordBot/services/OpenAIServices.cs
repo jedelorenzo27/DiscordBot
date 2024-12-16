@@ -96,7 +96,8 @@ namespace SpecterAI.services
                     messages = conversation.conversationArray,
                     temperature = 0.7,
                     max_tokens = 300,
-                    model = "gpt-4-0125-preview"
+                    model = "gpt-3.5-turbo"
+                    //Open AI is fucking us with their garbage pricing - need a new wrapper
                 };
 
                 var jsonContent = JsonConvert.SerializeObject(requestData);

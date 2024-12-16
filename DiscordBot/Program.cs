@@ -4,19 +4,12 @@ using Discord.Commands;
 using Discord.Interactions;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using SummaryAttribute = Discord.Commands.SummaryAttribute;
-using SpecterAI.pokemonStuff;
 using SpecterAI.services;
 using System.Net;
-using BotShared.services;
 using BotShared;
-using System.Data.Common;
 using BotDataAccess;
-using Microsoft.Data.SqlClient;
 using BotDataAccess.repositories;
-using BotShared.Utilities;
 using BotShared.models;
-using BotShared;
 
 public class Program
 {
@@ -48,7 +41,6 @@ public class Program
         DbConfiguration.InitializeDatabase(configuration); // Pass the built configuration to initialize the database.
 
         var connectionString = DbConfiguration.GetDatabaseConnectionString(configuration);
-        var dbConnection = new SqlConnection(connectionString);
         _challengeRepo = new ChallengeRepo(connectionString);
         _challengeSubmissionRepo = new ChallengeSubmissionRepo(connectionString);
         _challengeSubscriberRepo = new ChallengeSubscriberRepo(connectionString);
