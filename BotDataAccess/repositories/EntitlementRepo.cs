@@ -83,7 +83,7 @@ namespace BotDataAccess.repositories
             if (await GetEntitlementById(id, entitlement) == null)
             {
                 try { 
-                    var sql = $"INSERT INTO Entitlements VALUES ('{id}', '{entitlement}', '{DateTime.Now}');";
+                    var sql = $"INSERT INTO Entitlements VALUES ('{id}', '{entitlement}', '{DateTime.Now:yyyy-MM-dd HH:mm:ss}');";
                     await _db.ExecuteAsync(sql);
                 }
                 catch (Exception ex)
